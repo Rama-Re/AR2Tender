@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Account;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,12 +12,10 @@ class Employee extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'employee_id',
+        'emplyee_name',
     ];
-
-    protected $hidden = [
-  
-    ];
-
-    protected $casts = [
-    ];
+    public function User(){
+        return $this->belongsTo(User::class);
+    }
 }

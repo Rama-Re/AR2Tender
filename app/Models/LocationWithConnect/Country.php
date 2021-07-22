@@ -12,7 +12,12 @@ class Country extends Model
     protected $fillable = [
         'country_id',
         'country_name',
+        'num_code'
     ];
 
-    
+    protected $primaryKey = 'country_id';
+
+    public function Location(){
+        return $this->hasMany(Location::class,'country_id');
+    }
 }

@@ -2,25 +2,68 @@
 
 namespace App\Models\Account;
 use App\Models\User;
+use App\Models\Account\Employee;
+use App\Models\LocationWithController\CompanyLocation;
+use App\Models\LocationWithController\Phone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Company extends Model
+
+class Company  extends Authenticatable implements JWTSubject
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'company_id',
-        'location_id',
+        'user_id',
         'company_name',
-        'Director_name',
+        'director_name',
         'username',
+        'image',
+        'image_path',
+        'specialty',
+        'status',
         'about_us'
     ];
 
-    public function User(){
-        return $this->belongsTo(User::class);
+    protected $primaryKey = 'company_id';
+
+    // Rest omitted for brevity
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
     }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function User(){
+        return $this->belongsTo(User::class,'user_id');
+    }
+    
+    public function Employee(){
+        return $this->hasMany(Employee::class,'company_id');
+    }
+    
+    public function CompanyLocation(){
+        return $this->hasMany(CompanyLocation::class,'company_id');
+    }
+
+
     
 }

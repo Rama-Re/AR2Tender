@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\AssignGuard;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -40,6 +41,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -62,5 +64,12 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        
+        'checkPassword' => \App\Http\Middleware\CheckPassword::class,
+        'jwt.auth' => 'Tymon\JWTAuth\Middleware\GetUserFromToken',
+        'jwt.refresh' => 'Tymon\JWTAuth\Middleware\RefreshToken',
+        'checkToken' => \App\Http\Middleware\CheckUserToken::class,
+        'checkType' => \App\Http\Middleware\CheckUserType::class,
+        'json.response' => \App\Http\Middleware\ForceJsonResponse::class,
     ];
 }

@@ -7,22 +7,26 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+
+class User extends Authenticatable implements JWTSubject ,MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
+
     protected $fillable = [
-        'user_id',
-        'company_id',
-        'employee_id',
         'email',
+        'user_id',
         'type',
-        'password',
+        'is_verified',
     ];
+       
+    protected $primaryKey = 'user_id';
 
     protected $hidden = [
         'password',
+        'confirm_code',
         'remember_token',
     ];
 
@@ -30,10 +34,36 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    // Rest omitted for brevity
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+
     public function Company(){
         return $this->hasOne(Company::class);
     }
     public function Employee(){
+        return $this->hasOne(Employee::class);
+    }
+    public function Admin(){
         return $this->hasOne(Employee::class);
     }
 }

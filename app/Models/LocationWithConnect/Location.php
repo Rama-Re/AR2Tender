@@ -11,9 +11,16 @@ class Location extends Model
 
     protected $fillable = [
         'location_id',
+        'country_id',
         'location_name',
-        'country_id'
     ];
 
-    
+    protected $primaryKey = 'location_id';
+
+    public function CompanyLocation(){
+        return $this->hasMany(CompanyLocation::class,'location_id');
+    }
+    public function Country(){
+        return $this->belongsTo(Country::class,'country_id');
+    }
 }

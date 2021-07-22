@@ -1,7 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AccountControllers\AdminController;
+use App\Http\Controllers\AccountControllers\UserAuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AccountControllers\CompanyController;
+use App\Http\Controllers\AccountControllers\EmployeeController;
+use App\Http\Controllers\AccountControllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,8 +16,31 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+ */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post("company/upload", [CompanyController::class,'uploadCompanyPhoto']);
+Route::post("company/register", [CompanyController::class,'register']);
+Route::get("user/login", [UserAuthController::class,'login']);
+
+///***///
+//Admin Group
+///***///
+Route::group(['middleware' => ['checkToken','checkType:admin','json.response']], function () {
+    Route::post("admin/register", [AdminController::class,'register']);
+    Route::get("admin/getProfile",[AdminController::class,'getProfile']);
+});
+
+///***///
+//Company Group
+///***///
+Route::group(['middleware' => ['checkToken','checkType:company']], function () {
+    Route::post("employee/register", [EmployeeController::class,'register']);
+    Route::get("company/getProfile",[CompanyController::class,'getProfile']);
+});
+
+///***///
+//Employee Group
+///***///
+Route::group(['middleware' => ['checkToken','checkType:employee']], function () {
+    Route::get("employee/getProfile",[EmployeeController::class,'getProfile']);
 });

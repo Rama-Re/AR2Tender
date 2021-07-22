@@ -1,21 +1,29 @@
 <?php
 
 namespace App\Models\Account;
+use App\Models\User;
+use App\Models\Account\Company;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class Employee extends Authenticatable
+class Employee extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'employee_id',
-        'emplyee_name',
+        'employee_name',
+        'user_id',
+        'company_id'
     ];
+
+    protected $primaryKey = 'employee_id';
+
     public function User(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'user_id');
+    }
+    public function Company(){
+        return $this->belongsTo(Company::class,'company_id');
     }
 }

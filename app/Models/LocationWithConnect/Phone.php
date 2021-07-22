@@ -11,10 +11,13 @@ class Phone extends Model
 
     protected $fillable = [
         'phone_id',
-        'phone_number',
-        'company_id',
-        'numcode_id',
+        'number',
+        'company_location_id',
     ];
-
     
+    protected $primaryKey = 'phone_id';
+    
+    public function CompanyLocation(){
+        return $this->belongsTo(CompanyLocation::class,'company_id');
+    }
 }

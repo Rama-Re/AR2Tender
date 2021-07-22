@@ -14,12 +14,18 @@ class CreateCompaniesTable extends Migration
     public function up()
     {
         Schema::create('companies', function (Blueprint $table) {
-            $table->id();
-            $table->string('director_name');
+            $table->bigIncrements('company_id')->unique();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->string('director_name'); 
             $table->string('company_name');
+            $table->string('image')->unique();
+            $table->string('image_path')->unique();
             $table->string('username')->unique();
             $table->longText('about_us');
-            $table->timestamps()->nullable();
+            $table->enum('status', ['TenderOffer', 'TendersManager'])->default('TendersManager');
+            $table->enum('specialty', ['medical', 'engineering-related','Raw materials','technical','technology-related','Other']);
+            $table->timestamps();
         });
     }
 

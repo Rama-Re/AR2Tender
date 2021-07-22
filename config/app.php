@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'AR2Tender'),
 
     /*
     |--------------------------------------------------------------------------
@@ -169,8 +169,11 @@ return [
         /*
          * Application Service Providers...
          */
+        'Tymon\JWTAuth\Providers\LaravelServiceProvider',
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
+        
+        //Tymon\JWTAuth\Providers\LumenServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
@@ -227,7 +230,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
+        'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
     ],
 
 ];

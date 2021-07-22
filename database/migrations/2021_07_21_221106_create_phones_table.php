@@ -14,7 +14,10 @@ class CreatePhonesTable extends Migration
     public function up()
     {
         Schema::create('phones', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('phone_id')->unique();
+            $table->string('number');
+            $table->unsignedBigInteger('company_location_id');
+            $table->foreign('company_location_id')->references('company_location_id')->on('company_locations');
             $table->timestamps();
         });
     }

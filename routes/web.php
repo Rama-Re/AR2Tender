@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccountControllers\AdminController;
+use App\Mail\SampleMail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +15,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get("/", function(){return new SampleMail();});
+Route::get("register", [AdminController::class,'register']);

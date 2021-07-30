@@ -45,7 +45,7 @@ class CompanyController extends Controller
             $validator = Validator::make($data, [
                 'image'=> 'required|mimes:png,jpg,jpeg,gif|max:2305',
             ]);
-
+            
             //Send failed response if request is not valid
             if ($validator->fails()) {
                 $code = $generalTrait->returnCodeAccordingToInput($validator);
@@ -54,16 +54,16 @@ class CompanyController extends Controller
         } catch (\Exception $e) {
             return $generalTrait->returnError($e->getCode(), $e->getMessage());
         }
-
+        
         if($file = $request->file('image'))
-        {
+        { 
             $image_path = $file->store('public/images');
             $name = $file->getClientOriginalName();
             $image = time().$name;
             return $generalTrait->returnData('image_details',compact('image','image_path'));
         }
         else return $generalTrait->returnError('401', 'can\'t upload image');
-
+        
     }
     public function register(Request $request){
         $generalTrait = new GeneralTrait;
@@ -107,29 +107,30 @@ class CompanyController extends Controller
             }
         }
         return $response;
-        $response = UserAuthController::validationToken($request);
     }
-
+    
     public function index()
     {
+        $generalTrait = new GeneralTrait;
         $companies = Company::get();
-        return $this ->returnData('companies',$companies);
+        return $generalTrait ->returnData('companies',$companies);
     }
     
     public function getCompanyById(Request $request)
     {
+        $generalTrait = new GeneralTrait;
         $company = Company::find($request->id);
         if (!$company) {
-            return $this->returnError('401', 'this company is not found');
+            return $generalTrait->returnError('401', 'this company is not found');
         }
-
-        return $this->returnData('company', $company);
+        
+        return $generalTrait->returnData('company', $company);
     }
     
     public function changeStatus(Request $request){
-
+        $generalTrait = new GeneralTrait;
         Company::where('company_id',$request->id)-> update(['status' => $request -> status]);
-        return $this -> returnSuccessMessage('updated');
+        return $generalTrait -> returnSuccessMessage('updated');
     }
     
 }

@@ -13,7 +13,6 @@ class CompanyLocation extends Model
         'company_location_id',
         'company_id',
         'location_id',
-        'branch_count'
     ];
     protected $casts = [
         'set_up_date' => 'datetime',

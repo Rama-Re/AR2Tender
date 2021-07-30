@@ -1,17 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\LocWithConnectContollers;
+namespace App\Http\Controllers\Location;
+
+use App\Assets\Country;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\LocationWithController\Country;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-
-class CompanyController extends Controller
+class CountryController extends Controller
 {
-    public function index(){
-        $countries = Country::get();
-        return response()->json($countries);
+    public function save()
+    {
+        if (empty(DB::table('countries')->count())) {
+            $countries = Country::get_all();
+
+            foreach ($countries as $key => $value) {
+                $countriesarray = [
+                    'country_id' => $key,
+                    'country_name' => $value['name'],
+                    'num_code' => $value['code'],
+                ];
+                DB::table('countries')->insert($countriesarray);
+            }
+        } else {
+            throw new Exception('the countries table has elements');
+        }
+
     }
 }

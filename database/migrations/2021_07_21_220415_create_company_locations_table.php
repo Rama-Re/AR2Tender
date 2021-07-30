@@ -16,9 +16,10 @@ class CreateCompanyLocationsTable extends Migration
         Schema::create('company_locations', function (Blueprint $table) {
             $table->bigIncrements('company_location_id')->unique();
             $table->unsignedBigInteger('company_id');
-            $table->foreign('company_id')->references('company_id')->on('companies');
+            $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
             $table->unsignedBigInteger('location_id');
-            $table->foreign('location_id')->references('location_id')->on('locations');
+            $table->foreign('location_id')->references('location_id')->on('locations')->onDelete('cascade');
+            $table->timestampTz('set_up_date', $precision = 0);
             $table->unsignedInteger('branch_count')->unique();
             $table->timestamps();
         });

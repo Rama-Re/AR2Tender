@@ -15,8 +15,10 @@ class CreateLocationsTable extends Migration
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->bigIncrements('location_id')->unique();
-            $table->unsignedBigInteger('country_id');
+
+            $table->char('country_id',2);
             $table->foreign('country_id')->references('country_id')->on('countries');
+
             $table->string('location_name');
             $table->timestamps();
         });

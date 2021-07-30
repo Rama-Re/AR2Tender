@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\LocWithConnectContollers;
+namespace App\Http\Controllers\LocWithConnectControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\LocationWithController\CompanyLocation;

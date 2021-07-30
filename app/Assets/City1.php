@@ -4,6 +4,7 @@ namespace App\Assets;
 
 class City1 {
 private static $cities_array = array (
+  /*
   0 => 
   array (
     'city' => 'Sant Julià de Lòria',
@@ -112012,7 +112013,7 @@ private static $cities_array = array (
     'latitude' => '30.05583',
     'longitude' => '120.53133',
   ),
-  
+  */
 );
 
   public static function get_all(){

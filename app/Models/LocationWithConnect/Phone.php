@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\LocationWithController;
+namespace App\Models\LocationWithConnect;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

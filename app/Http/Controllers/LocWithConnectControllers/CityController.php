@@ -4,7 +4,7 @@ namespace App\Http\Controllers\LocWithConnectControllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
-use App\Models\LocationWithConnect\Location;
+use App\Models\LocationWithController\Location;
 //set_time_limit(1000);
 use Illuminate\Support\Facades\DB;
 

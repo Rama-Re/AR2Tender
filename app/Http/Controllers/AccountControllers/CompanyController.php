@@ -4,8 +4,10 @@ namespace App\Http\Controllers\AccountControllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\LocWithConnectControllers\CompanyLocationController;
 use App\Models\Account\Admin;
 use App\Models\Account\Company;
+use App\Models\LocationWithConnect\CompanyLocation;
 use Illuminate\Support\Facades\Validator;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
@@ -15,7 +17,7 @@ class CompanyController extends Controller
     public static function validation(Request $request){
         $generalTrait = new GeneralTrait;
         try {
-            $data = $request->only('company_name','type', 'director_name','username','image','image_path','specialty','about_us');
+            $data = $request->only('company_name','type', 'director_name','username','image','image_path','specialty','about_us','locations');
             $validator = Validator::make($data, [
                 'type' => 'required|in:company',
                 'company_name' => 'required|string',
@@ -26,6 +28,9 @@ class CompanyController extends Controller
                 'specialty' => 'required|in:medical,engineering-related,Raw-materials,technical,technology-related,Other',
                 'status' => 'in:TenderOffer,TendersManager',
                 'about_us' => 'required',
+                'locations' => 'required|array',
+                //'locations.*.location_id'=> 'required|locations,location_id',
+                'locations.*.branch_count'=>'required'
             ]);
             
             //Send failed response if request is not valid
@@ -72,7 +77,6 @@ class CompanyController extends Controller
         if($result["status"]){
             $result2 = $this->validation($request);
             if($result2["status"]){
-                //Request is valid, create new user
                 $response = $userC->register($request);
                 $company = new Company;
                 $company->company_name = $request->company_name;
@@ -86,12 +90,20 @@ class CompanyController extends Controller
                 //$company->user_id = 1;
                 $company->user_id = ($response["user"])->user_id;
                 $company->save();
+                if($company){
+                    foreach($request->locations as $location){
+                        $companyLocation = new CompanyLocationController;
+                        //$companyLocation->store($location,1);
+                        //return $location;
+                        $companyLocation->store($location,$company->company_id);
+                    }
+                }
                 //Company created, return success response
-                return $generalTrait->returnSuccessMessage('Company created successfully');
+                return $generalTrait->returnData('company',$company,'Company created successfully');
             }
-            else return $result2;
+            else return response()->json($result2);
         }
-        else return $result;
+        else return response()->json($result);
     }
     public function getProfile(Request $request){
         $generalTrait = new GeneralTrait;

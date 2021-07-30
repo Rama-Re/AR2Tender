@@ -3,11 +3,35 @@
 namespace App\Http\Controllers\LocWithConnectControllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\LocationWithController\CompanyLocation;
+use App\Http\Controllers\GeneralTrait;
+use App\Models\LocationWithConnect\CompanyLocation;
+use App\Models\LocationWithConnect\Location;
+use App\Models\LocationWithConnect\Phone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use League\Flysystem\Adapter\Local;
 
 class CompanyLocationController extends Controller
 {
+    public static function validation(Request $request){
+        $generalTrait = new GeneralTrait;
+        try {
+                $data = $request->only('location_id','branch_count');
+                $validator = Validator::make($data, [
+                    'location_id' => 'required|locations,location_id',
+                    'branch_count' => 'required'
+                ]);
+            
+            //Send failed response if request is not valid
+            if ($validator->fails()) {
+                $code = $generalTrait->returnCodeAccordingToInput($validator);
+                return $generalTrait->returnValidationError($code, $validator);
+            }
+            else return $generalTrait->returnSuccessMessage('validated');
+        } catch (\Exception $e) {
+            return $generalTrait->returnError($e->getCode(), $e->getMessage());
+        }
+    }
     /**
      * Display a listing of the resource.
      *
@@ -34,9 +58,20 @@ class CompanyLocationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store($request,$company_id)
     {
-        //
+        $generalTrait = new GeneralTrait;
+        $companyLocation = new CompanyLocation;
+        $companyLocation->location_id = $request['location_id'];
+        $companyLocation->company_id = $company_id;
+        $companyLocation->branch_count = $request['branch_count'];
+        $companyLocation->save();
+        foreach($request['phones'] as $phone){
+            $phoneController = new PhoneController;
+            $phoneController->store($phone,$companyLocation->company_location_id);
+        }
+        return $generalTrait->returnData('location',$companyLocation,'companyLocation added successfuly');
+        
     }
 
     /**

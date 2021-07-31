@@ -60,9 +60,10 @@ class EmployeeController extends Controller
             if($result["status"]){
                 $employee = Employee::where('user_id',$result["user"]->user_id)->get();
                 if (!$employee) {
-                    return $generalTrait->returnError('404', 'not found');
+                    return $generalTrait->returnError('404', 'Not Found');
                 }
-                return $generalTrait->returnData('company', $employee);
+                
+                return $generalTrait->returnData('employee', $employee);
             }
         }
         return $response;

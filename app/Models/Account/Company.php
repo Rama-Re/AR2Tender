@@ -3,6 +3,7 @@
 namespace App\Models\Account;
 use App\Models\User;
 use App\Models\Account\Employee;
+use App\Models\CommitteeRelations\VirtualCommittee;
 use App\Models\LocationWithController\CompanyLocation;
 use App\Models\LocationWithController\Phone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -62,6 +63,10 @@ class Company  extends Authenticatable implements JWTSubject
     
     public function CompanyLocation(){
         return $this->hasMany(CompanyLocation::class,'company_id');
+    }
+    
+    public function VirtualCommittee(){
+        return $this->hasMany(VirtualCommittee::class,'company_id');
     }
 
 

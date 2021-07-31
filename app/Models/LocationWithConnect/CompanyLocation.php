@@ -14,6 +14,8 @@ class CompanyLocation extends Model
         'company_id',
         'location_id',
     ];
+    protected $primaryKey = 'company_location_id';
+
     protected $casts = [
         'set_up_date' => 'datetime',
     ];

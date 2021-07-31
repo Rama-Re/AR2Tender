@@ -23,6 +23,8 @@ use App\Http\Controllers\LocWithConnectControllers\LocationController;
 
 Route::post("saveCountries", [CountryController::class,'save']);
 Route::post("saveCities", [LocationController::class,'save']);
+
+Route::get("company/getCompanyById", [CompanyController::class,'getCompanyById']);
 Route::post("company/upload", [CompanyController::class,'uploadCompanyPhoto']);
 Route::post("company/register", [CompanyController::class,'register']);
 Route::get("user/login", [UserAuthController::class,'login']);
@@ -30,9 +32,11 @@ Route::get("user/login", [UserAuthController::class,'login']);
 ///***///
 //Admin Group
 ///***///
+
 Route::group(['middleware' => ['checkToken','checkType:admin','json.response']], function () {
     Route::post("admin/register", [AdminController::class,'register']);
     Route::get("admin/getProfile",[AdminController::class,'getProfile']);
+    Route::get("company/getAll",[CompanyController::class,'getall']);
 });
 
 ///***///
@@ -41,6 +45,7 @@ Route::group(['middleware' => ['checkToken','checkType:admin','json.response']],
 Route::group(['middleware' => ['checkToken','checkType:company']], function () {
     Route::post("employee/register", [EmployeeController::class,'register']);
     Route::get("company/getProfile",[CompanyController::class,'getProfile']);
+    Route::get("company/changeStatus",[CompanyController::class,'changeStatus']);
 });
 
 ///***///

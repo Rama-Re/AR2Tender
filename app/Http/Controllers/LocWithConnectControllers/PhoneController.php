@@ -45,6 +45,7 @@ class PhoneController extends Controller
         $phone = new Phone;
         $phone->phone_number = $phone_number;
         $phone->company_location_id = $company_location_id;
+        $phone->save();
         return $generalTrait->returnData('phone',$phone,'phone added successfuly');
     }
 

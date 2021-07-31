@@ -8,9 +8,13 @@ use App\Http\Controllers\LocWithConnectControllers\CompanyLocationController;
 use App\Models\Account\Admin;
 use App\Models\Account\Company;
 use App\Models\LocationWithConnect\CompanyLocation;
+use App\Models\LocationWithConnect\Country;
+use App\Models\LocationWithConnect\Location;
+use App\Models\LocationWithConnect\Phone;
 use Illuminate\Support\Facades\Validator;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class CompanyController extends Controller
 {    
@@ -29,7 +33,7 @@ class CompanyController extends Controller
                 'status' => 'in:TenderOffer,TendersManager',
                 'about_us' => 'required',
                 'locations' => 'required|array',
-                //'locations.*.location_id'=> 'required|locations,location_id',
+                'locations.*.location_id'=> 'required',
                 'locations.*.branch_count'=>'required'
             ]);
             
@@ -87,62 +91,90 @@ class CompanyController extends Controller
                 $company->about_us = $request->about_us;
                 $company->image = $request->image;
                 $company->image_path = $request->image_path;
-                //$company->user_id = 1;
+                $company->user_id = 1;
                 $company->user_id = ($response["user"])->user_id;
                 $company->save();
                 if($company){
                     foreach($request->locations as $location){
                         $companyLocation = new CompanyLocationController;
-                        //$companyLocation->store($location,1);
-                        //return $location;
                         $companyLocation->store($location,$company->company_id);
                     }
                 }
                 //Company created, return success response
-                return $generalTrait->returnData('company',$company,'Company created successfully');
+                return response()->json($generalTrait->returnData('company',$company,'Company created successfully'));
             }
             else return response()->json($result2);
         }
         else return response()->json($result);
     }
+    
+    public function getAll(){
+        $generalTrait = new GeneralTrait;
+        $companies = Company::get();
+        return response()->json($generalTrait ->returnData('companies',$companies));
+    }
+
     public function getProfile(Request $request){
         $generalTrait = new GeneralTrait;
         $response = UserAuthController::validationToken($request);
         if($response["status"]){
             $result = UserAuthController::getUser($request);
             if($result["status"]){
+                $company = Company::where('user_id',$result["user"]->user_id)->get()->first();
+                $locationsID = Company::join('company_locations', 'company_locations.company_id', '=', 'companies.company_id')
+                ->where('companies.company_id',$company->company_id)
+                ->get(['company_locations.location_id','company_locations.company_location_id','company_locations.branch_count']);
+                $locations = array();
+                $count = 0;
+                foreach($locationsID as $branch){
+                    $phones = Phone::join('company_locations','company_locations.company_location_id','phones.company_location_id')
+                    ->where('company_locations.company_location_id',$branch->company_location_id)
+                    ->get('phone_number');
+                    $location = Location:: where('location_id',$branch->location_id)->get('location_name')->first()->location_name;
+                    $country_id = Location:: where('location_id',$branch->location_id)->get('country_id')->first()->country_id;
+                    $country = Country::where('country_id',$country_id)->get('country_name')->first()->country_name;
+                    $locations[$count] = compact('location','country','phones');
+                    $count++;
+                }
+                return compact('company','locations');
                 $company = Company::where('user_id',$result["user"]->user_id)->get();
                 if (!$company) {
-                    return $generalTrait->returnError('404', 'not found');
+                    return response()->json($generalTrait->returnError('404', 'not found'));
                 }
-                return $generalTrait->returnData('company', $company);
+                return response()->json($generalTrait->returnData('Profile',compact('company','locations'),'Success'));
             }
+            else response()->json($result);
         }
-        return $response;
-    }
-    
-    public function index()
-    {
-        $generalTrait = new GeneralTrait;
-        $companies = Company::get();
-        return $generalTrait ->returnData('companies',$companies);
+        return response()->json($response);
     }
     
     public function getCompanyById(Request $request)
     {
         $generalTrait = new GeneralTrait;
-        $company = Company::find($request->id);
+        $company = Company::find($request->company_id);
         if (!$company) {
-            return $generalTrait->returnError('401', 'this company is not found');
+            return response()->json($generalTrait->returnError('401', 'this company is not found'));
         }
         
-        return $generalTrait->returnData('company', $company);
+        return response()->json($generalTrait->returnData('company', $company));
     }
     
     public function changeStatus(Request $request){
         $generalTrait = new GeneralTrait;
-        Company::where('company_id',$request->id)-> update(['status' => $request -> status]);
-        return $generalTrait -> returnSuccessMessage('updated');
+        $company = Company::find($request->company_id);
+        if(Company::find($request->company_id)->get('status')->first()->status == 'TenderOffer')
+        {
+            $company->status = 'TendersManager';
+            $company->save();
+            return response()->json($generalTrait -> returnSuccessMessage('updated'));
+        }
+        else if(Company::find($request->company_id)->get('status')->first()->status == 'TendersManager')
+        {
+            $company->status = 'TenderOffer';
+            $company->save();
+            return response()->json($generalTrait -> returnSuccessMessage('updated'));
+        }
+        return response()->json($generalTrait -> returnError('403','something went wrong'));
     }
     
 }

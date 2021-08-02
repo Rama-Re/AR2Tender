@@ -18,6 +18,8 @@ class CitySeeder extends Seeder
      */
     public function run()
     {
-        LocationController::save();
+        LocationController::saveFav();
+        //to save all cities
+        // LocationController::saveAll();
     }
 }

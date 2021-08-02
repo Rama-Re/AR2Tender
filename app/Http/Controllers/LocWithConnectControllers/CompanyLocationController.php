@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\LocWithConnectControllers;
 
 use App\Http\Controllers\Controller;
+
 use App\Http\Controllers\GeneralTrait;
 use App\Models\LocationWithConnect\CompanyLocation;
 use App\Models\LocationWithConnect\Location;

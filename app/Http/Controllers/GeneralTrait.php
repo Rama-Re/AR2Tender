@@ -51,7 +51,7 @@ class GeneralTrait extends Controller
         ];
     }
     
-    public function returnDatawithToken($key, $value, $msg = "", $token){
+    public function returnDataWithToken($key, $value, $token ,$msg = ""){
         return [
             'status' => true,
             'errNum' => "200",
@@ -61,7 +61,7 @@ class GeneralTrait extends Controller
         ];
     }
 
-    public function returnValidationError($code = 'E001', $validator){
+    public function returnValidationError( $validator,$code = 'E001'){
         return $this->returnError($code,$validator->errors()->first());
     }
 

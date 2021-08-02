@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Assets;
+namespace App\Assets\Locations;
 
 class FavCities {
 private static $cities_array = array (

@@ -20,7 +20,7 @@ class CreateLocationsTable extends Migration
             $table->foreign('country_id')->references('country_id')->on('countries');
 
             $table->string('location_name');
-            $table->timestamps();
+            
         });
     }
 

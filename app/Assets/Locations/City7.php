@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Assets;
+namespace App\Assets\Locations;
 
 class City7 {
 private static $cities_array = array (74001 => 

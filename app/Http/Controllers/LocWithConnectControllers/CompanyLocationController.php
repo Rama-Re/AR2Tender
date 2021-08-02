@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\LocWithConnectControllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\LocationWithController\CompanyLocation;
 use Illuminate\Http\Request;
+use App\Models\LocationWithConnect\CompanyLocation;
 
 class CompanyLocationController extends Controller
 {

@@ -9,6 +9,7 @@ use App\Http\Controllers\AccountControllers\UserController;
 use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
 use App\Http\Controllers\LocWithConnectControllers\LocationController;
+use App\Http\Controllers\TenderRelatedControllers\TenderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,4 +49,13 @@ Route::group(['middleware' => ['checkToken','checkType:company']], function () {
 ///***///
 Route::group(['middleware' => ['checkToken','checkType:employee']], function () {
     Route::get("employee/getProfile",[EmployeeController::class,'getProfile']);
+});
+
+Route::group(['prefix' => 'tenders'], function () {
+
+    Route::group(['prefix' => 'filter'], function () {
+        Route::post("category", [TenderController::class,'indexFilterOnCategory']);
+        Route::post("date", [TenderController::class,'indexFilterOnDate']);
+    });
+
 });

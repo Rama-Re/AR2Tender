@@ -14,7 +14,10 @@ class CreateCommitteesTable extends Migration
     public function up()
     {
         Schema::create('committees', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('committee_id')->unique();
+            $table->unsignedBigInteger('tender_id');
+            $table->foreign('tender_id')->references('tender_id')->on('tenders')->onDelete('cascade');
+            $table->enum('type',['financial','technician','decision maker']);
             $table->timestamps();
         });
     }

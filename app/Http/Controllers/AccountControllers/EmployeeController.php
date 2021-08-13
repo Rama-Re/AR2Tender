@@ -4,6 +4,7 @@ namespace App\Http\Controllers\AccountControllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
 use App\Models\Account\Employee;
 use Exception;
 use Illuminate\Http\Request;
@@ -12,22 +13,10 @@ use Illuminate\Support\Facades\Validator;
 class EmployeeController extends Controller
 {
     public static function validation(Request $request){
-        $generalTrait = new GeneralTrait;
-        try {
-            $data = $request->only('employee_name','company_id');
-            $validator = Validator::make($data, [
-                'employee_name' => 'required|string',
-                'company_id'=> 'required'
-            ]);
-            //Send failed response if request is not valid
-            if ($validator->fails()) {
-                $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
-            }
-            else return $generalTrait->returnSuccessMessage('validated');
-        } catch (\Exception $e) {
-            return $generalTrait->returnError($e->getCode(), $e->getMessage());
-        }
+        return MyValidator::validation($request->only('employee_name','company_id'), [
+            'employee_name' => 'required|string',
+            'company_id'=> 'required'
+        ]);
     }
     public function register(Request $request){
         $generalTrait = new GeneralTrait;
@@ -82,4 +71,13 @@ class EmployeeController extends Controller
         }
         return $generalTrait->returnData('employee', $employee);
     }
+    public function getAllCompanyEmployees(Request $request){
+        $generalTrait = new GeneralTrait;
+        $employees = Employee::where('company_id',$request->company_id)->get();
+        if (!$employees) {
+            return $generalTrait->returnError('401', 'there is\'t employees in this company');
+        }
+        return $generalTrait->returnData('employees', $employees);
+    }
+
 }

@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 
 class GeneralTrait extends Controller
 {
-    public function returnError($errNum, $msg)
+    public static function returnError($errNum, $msg)
     {
         return [
             'status' => false,
@@ -24,7 +24,7 @@ class GeneralTrait extends Controller
     }
     */
     
-    public function returnSuccessMessage($msg = "", $errNum = "200")
+    public static function returnSuccessMessage($msg = "", $errNum = "200")
     {
         return ['status' => true,
             'errNum' => $errNum,
@@ -32,17 +32,7 @@ class GeneralTrait extends Controller
         ];
     }
     
-    /*
-    public function returnData($key, $value, $msg = ""){
-        return response()->json([
-            'user'=> $value,
-            'user_id' => $value->user_id
-
-        ]);
-    }
-    */
-    
-    public function returnData($key, $value, $msg = ""){
+    public static function returnData($key, $value, $msg = ""){
         return [
             'status' => true,
             'errNum' => "200",
@@ -51,7 +41,7 @@ class GeneralTrait extends Controller
         ];
     }
     
-    public function returnDataWithToken($key, $value, $token ,$msg = ""){
+    public static function returnDataWithToken($key, $value, $token ,$msg = ""){
         return [
             'status' => true,
             'errNum' => "200",
@@ -61,18 +51,18 @@ class GeneralTrait extends Controller
         ];
     }
 
-    public function returnValidationError( $validator,$code = 'E001'){
-        return $this->returnError($code,$validator->errors()->first());
+    public static function returnValidationError( $validator,$code = 'E001'){
+        return GeneralTrait::returnError($code,$validator->errors()->first());
     }
 
-    public function returnCodeAccordingToInput($validator)
+    public static function returnCodeAccordingToInput($validator)
     {
         $inputs = array_keys($validator->errors()->toArray());
-        $code = $this->getErrorCode($inputs[0]);
+        $code = GeneralTrait::getErrorCode($inputs[0]);
         return $code;
     }
 
-    public function getErrorCode($input)
+    public static function getErrorCode($input)
     {
         if($input == "username"){
             return 'E001';

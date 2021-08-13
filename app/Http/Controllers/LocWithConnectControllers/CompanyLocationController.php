@@ -5,6 +5,7 @@ namespace App\Http\Controllers\LocWithConnectControllers;
 use App\Http\Controllers\Controller;
 
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
 use App\Models\LocationWithConnect\CompanyLocation;
 use App\Models\LocationWithConnect\Location;
 use App\Models\LocationWithConnect\Phone;
@@ -15,23 +16,12 @@ use League\Flysystem\Adapter\Local;
 class CompanyLocationController extends Controller
 {
     public static function validation(Request $request){
-        $generalTrait = new GeneralTrait;
-        try {
-                $data = $request->only('location_id','branch_count');
-                $validator = Validator::make($data, [
-                    'location_id' => 'required|locations,location_id',
-                    'branch_count' => 'required'
-                ]);
-            
-            //Send failed response if request is not valid
-            if ($validator->fails()) {
-                $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
-            }
-            else return $generalTrait->returnSuccessMessage('validated');
-        } catch (\Exception $e) {
-            return $generalTrait->returnError($e->getCode(), $e->getMessage());
-        }
+        $data = $request->only('location_id','branch_count');
+        $rules =  [
+            'location_id' => 'required|locations,location_id',
+            'branch_count' => 'required'
+        ];
+        return MyValidator::validation($data, $rules);
     }
     /**
      * Display a listing of the resource.

@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class CitySeeder extends Seeder
+class LocationSeeder extends Seeder
 {
     /**
      * Run the database seeds.

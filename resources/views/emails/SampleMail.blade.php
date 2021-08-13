@@ -1,8 +1,12 @@
-@component('mail::message')
-# Introduction
-
-The body of your message.
-
-Thanks,<br>
-{{ config('app.name') }}
-@endcomponent
+<!DOCTYPE html>
+<html>
+<head>
+    <title>artwotender@gmail.com.com</title>
+</head>
+<body>
+    <h1>{{ $details['title'] }}</h1>
+    <p>{{ $details['body'] }}</p>
+   
+    <p>Thank you</p>
+</body>
+</html>

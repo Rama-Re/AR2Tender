@@ -28,7 +28,9 @@ Route::post("saveCities", [LocationController::class,'save']);
 Route::get("company/getCompanyById", [CompanyController::class,'getCompanyById']);
 Route::post("company/upload", [CompanyController::class,'uploadCompanyPhoto']);
 Route::post("company/register", [CompanyController::class,'register']);
-Route::get("user/login", [UserAuthController::class,'login']);
+Route::post("user/login", [UserAuthController::class,'login']);
+Route::post("user/logout", [UserAuthController::class,'logout']);
+Route::post("user/sendEmail", [UserAuthController::class,'sendEmail']);
 
 ///***///
 //Admin Group

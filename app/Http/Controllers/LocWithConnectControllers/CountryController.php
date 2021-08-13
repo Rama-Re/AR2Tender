@@ -278,7 +278,7 @@ class CountryController extends Controller
         $generalTrait = new GeneralTrait;
 
         if (empty(DB::table('countries')->count())) {
-            $countries = Country::get_all();
+            $countries = self::get_all();
 
             foreach ($countries as $key => $value) {
                 $countriesarray = [

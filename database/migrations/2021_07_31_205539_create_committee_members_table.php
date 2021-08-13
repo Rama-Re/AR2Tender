@@ -14,7 +14,12 @@ class CreateCommitteeMembersTable extends Migration
     public function up()
     {
         Schema::create('committee_members', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('committee_id');
+            $table->unsignedBigInteger('employee_id');
+            $table->foreign('committee_id')->references('committee_id')->on('committees')->onDelete('cascade');
+            $table->foreign('employee_id')->references('employee_id')->on('employees')->onDelete('cascade');
+            $table->primary(['committee_id','employee_id'],'committee_member_id')->unique();
+            $table->enum('task',['decision maker','viewer','administrator','discussant']);
             $table->timestamps();
         });
     }

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use GrahamCampbell\ResultType\Result;
 use Illuminate\Support\Facades\Hash;
@@ -37,9 +38,9 @@ class UserAuthController extends Controller
     }
     public static function validationToken(Request $request)
     {
-        return MyValidator::validation($request->only('token'), [
-            'token' => 'required',
-        ]);
+        if($request->headers->has('token'))
+        return GeneralTrait::returnSuccessMessage("token exist in header");
+        else return GeneralTrait::returnError("404","token is required");
     }
     public function register(Request $request)
     {
@@ -59,11 +60,10 @@ class UserAuthController extends Controller
             'password' => 'required',
         ]);
         $generalTrait = new GeneralTrait;
-        if(!$result['status']){
+        if($result['status']){
             try{
                 $credentials = $request->only(['email', 'password', 'type']);
-                //check
-                
+                //check                
                 $token = JWTAuth::attempt($credentials);
                 if (!$token) {
                     return $generalTrait->returnError('E001', 'Email or Password is wrong');
@@ -79,8 +79,11 @@ class UserAuthController extends Controller
     public static function getUser(Request $request)
     {
         $generalTrait = new GeneralTrait;
-        $result = UserAuthController::validationToken($request);
-        $user = JWTAuth::parseToken()->authenticate();
+        $token = $request->header('token');
+        $request->headers->set('token',(string)$token,true);
+        $request->headers->set('Authorization','Bearer '.$token,true);
+        $user = JWTAuth::parseToken()->authenticate($request);
+
         if($user)
             return $generalTrait->returnData('user',$user);
         else return $generalTrait->returnError('401','Something went wrong');
@@ -93,8 +96,8 @@ class UserAuthController extends Controller
         if($result['status']){
             $user = JWTAuth::parseToken()->authenticate();
             if($user) {
-                $user->is_verified = false;
-                $user->save();
+                //$user->is_verified = false;
+                //$user->save();
                 try {
                     JWTAuth::invalidate(JWTAuth::getToken());
                     return $generalTrait->returnSuccessMessage('Logged out successfully');
@@ -174,7 +177,7 @@ class UserAuthController extends Controller
         if($user->confirm_code == $request->confirmCode){
             $user->is_verified = true;
             //check
-            $user->email_verified_at = time();
+            $user->email_verified_at = new Carbon(now('UTC'));
             $user->save();
             return response()->json($generalTrait->returnSuccessMessage('email verified successfully'));
         }

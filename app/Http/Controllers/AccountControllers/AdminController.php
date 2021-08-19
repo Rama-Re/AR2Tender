@@ -21,7 +21,7 @@ class AdminController extends Controller
     //use App\Http\Traits\GeneralTrait;
     //edit
     public static function validation(Request $request){
-        return MyValidator::validation($request->only('admin_name'), [
+        return MyValidator::validation($request->only('admin_name','type'), [
             'admin_name' => 'required',
             'type'=>'required|in:admin'
         ]);

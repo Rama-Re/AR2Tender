@@ -36,8 +36,8 @@ Route::post("user/sendEmail", [UserAuthController::class,'sendEmail']);
 //Admin Group
 ///***///
 
+Route::post("admin/register", [AdminController::class,'register']);
 Route::group(['middleware' => ['checkToken','checkType:admin','json.response']], function () {
-    Route::post("admin/register", [AdminController::class,'register']);
     Route::get("admin/getProfile",[AdminController::class,'getProfile']);
     Route::get("company/getAll",[CompanyController::class,'getall']);
 });

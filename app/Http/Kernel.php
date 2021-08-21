@@ -71,5 +71,7 @@ class Kernel extends HttpKernel
         'checkToken' => \App\Http\Middleware\CheckUserToken::class,
         'checkType' => \App\Http\Middleware\CheckUserType::class,
         'json.response' => \App\Http\Middleware\ForceJsonResponse::class,
+        'active_user' => \App\Http\Middleware\ActiveUser::class,
+        'verifyUser' => \App\Http\Middleware\VerificationUser::class,
     ];
 }

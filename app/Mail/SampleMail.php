@@ -31,6 +31,6 @@ class SampleMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Mail from R2Tender')->from("artwotender@gmail.com")->view('emails.SampleMail');
+        return $this->subject('Mail from AR2Tender')->from("artwotender@gmail.com")->view('emails.SampleMail');
     }
 }

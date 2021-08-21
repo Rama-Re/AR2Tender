@@ -152,7 +152,9 @@ class CompanyController extends Controller
     
     public function changeStatus(Request $request){
         $generalTrait = new GeneralTrait;
-        $company = Company::find($request->company_id);
+        $user = UserAuthController::getUser($request)['user'];
+        $user_id = $user['user_id'];
+        $company = Company::where('user_id',$user_id)->get()->first();
         if(Company::find($request->company_id)->get('status')->first()->status == 'TenderOffer')
         {
             $company->status = 'TendersManager';
@@ -167,5 +169,4 @@ class CompanyController extends Controller
         }
         return response()->json($generalTrait -> returnError('403','something went wrong'));
     }
-    
 }

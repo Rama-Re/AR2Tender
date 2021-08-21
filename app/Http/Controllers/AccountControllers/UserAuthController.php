@@ -21,7 +21,6 @@ use GrahamCampbell\ResultType\Result;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
-use function PHPUnit\Framework\isNull;
 
 class UserAuthController extends Controller
 {
@@ -182,5 +181,21 @@ class UserAuthController extends Controller
             return response()->json($generalTrait->returnSuccessMessage('email verified successfully'));
         }
         return  response()->json($generalTrait->returnError('401', 'wrong code'));
+    }
+    public function bloackUser(Request $request)
+    {
+        $user = User::where('email',$request->email)->get()->first();
+        if(!$user) return response()->json(GeneralTrait::returnError('404','email not registered'));
+        $user->bloacked = true;
+        $user->save();
+        return response()->json(GeneralTrait::returnSuccessMessage('email blocked successfully'));
+    }
+    public function unbloackUser(Request $request)
+    {
+        $user = User::where('email',$request->email)->get()->first();
+        if(!$user) return response()->json(GeneralTrait::returnError('404','email not registered'));
+        $user->bloacked = false;
+        $user->save();
+        return response()->json(GeneralTrait::returnSuccessMessage('email activated successfully'));
     }
 }

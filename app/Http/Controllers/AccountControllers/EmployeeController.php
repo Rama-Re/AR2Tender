@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
 use App\Http\Controllers\MyValidator;
 use App\Models\Account\Employee;
+use App\Models\Account\Company;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -31,6 +34,9 @@ class EmployeeController extends Controller
                 $employee->employee_name = $request->employee_name;
                 $employee->company_id = $request->company_id;
                 $employee->user_id = ($response["user"])->user_id;
+                $user = User::find(($response["user"])->user_id);
+                $user->is_verified = true;
+                $user->save();
                 //$employee->user_id = 1;
                 $employee->save();
                 
@@ -47,16 +53,15 @@ class EmployeeController extends Controller
         if($response["status"]){
             $result = UserAuthController::getUser($request);
             if($result["status"]){
-                $employee = Employee::where('user_id',$result["user"]->user_id)->get();
+                $employee = Employee::where('user_id',$result["user"]->user_id)->get()->first();
                 if (!$employee) {
-                    return $generalTrait->returnError('404', 'Not Found');
+                    return response()->json($generalTrait->returnError('404', 'Not Found'));
                 }
                 
-                return $generalTrait->returnData('employee', $employee);
+                return response()->json($generalTrait->returnData('employee', $employee));
             }
         }
-        return $response;
-        $response = UserAuthController::validationToken($request);
+        return response()->json($response);
     }
     public function index(){
         $generalTrait = new GeneralTrait;
@@ -79,5 +84,32 @@ class EmployeeController extends Controller
         }
         return $generalTrait->returnData('employees', $employees);
     }
-
+    public function sentEmailToRegister(Request $request)
+    {
+        $response = UserAuthController::validationToken($request);
+        if($response["status"]){
+            $result = UserAuthController::getUser($request);
+            if($result["status"]){
+                $company_name = Company::where('user_id',$result["user"]->user_i)->get('company_name')->first();
+                $details = [
+                    'title'=> $company_name.'\nYou have to sign in at AR2Tender Application with this account',
+                    'body'=> 'email: '.$request->email.'\npassword: '.$request->password
+                ];
+                Mail::to($request->email)->send(new \App\Mail\SampleMail($details));
+                return response()->json(GeneralTrait::returnSuccessMessage('email send successfully'));
+            }
+            else return response()->json($result);
+        }
+        else return response()->json($response);
+    }
+    
+    public function destroyUser(Request $request)
+    {
+        $user = User::where('email',$request->email)->get()->first();
+        if($user) {
+            $user->delete();
+            return response()->json(GeneralTrait::returnSuccessMessage('Account deleted succesfully'));
+        }
+        return response()->json(GeneralTrait::returnError('404', 'Not Found'));
+    }
 }

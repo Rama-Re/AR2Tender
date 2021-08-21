@@ -33,7 +33,7 @@ class AdminController extends Controller
         if($response["status"]){
             $result = UserAuthController::getUser($request);
             if($result["status"]){
-                $admin = Admin::where('user_id',$result["user"]->user_id)->get();
+                $admin = Admin::where('user_id',$result["user"]->user_id)->get()->first();
                 if (!$admin) {
                     return $generalTrait->returnError('404', 'not found');
                 }
@@ -67,4 +67,8 @@ class AdminController extends Controller
         
     }
 
+    public function updateProfile(Request $request)
+    {
+        # code...
+    }
 }

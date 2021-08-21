@@ -16,11 +16,10 @@ class CheckUserToken
         $user = null;
         try{
             $token = $request->header('token');
-        $request->headers->set('token',(string)$token,true);
-        $request->headers->set('Authorization','Bearer '.$token,true);
+            $request->headers->set('token',(string)$token,true);
+            $request->headers->set('Authorization','Bearer '.$token,true);
 
-        $user = JWTAuth::parseToken()->authenticate($request);
-            //$user = JWTAuth::parseToken()->authenticate();
+            $user = JWTAuth::parseToken()->authenticate($request);
         } catch(\Exception $e){
             if($e instanceof TokenInvalid)
                 return response()->json($generalTrait -> returnError('401','INVALID_TOKEN'));

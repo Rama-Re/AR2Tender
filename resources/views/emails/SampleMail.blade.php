@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>artwotender@gmail.com.com</title>
+    <title>artwotender@gmail.com</title>
 </head>
 <body>
     <h1>{{ $details['title'] }}</h1>

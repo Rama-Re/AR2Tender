@@ -23,7 +23,4 @@ class VirtualCommitteeMember extends Model
     public function VirtualCommittee(){
         return $this->belongsTo(VirtualCommittee::class,'virtual_committee_id');
     }
-    public function Judgment(){
-        return $this->hasMany(Judgment::class,'virtual_committee_member_id');
-    }
 }

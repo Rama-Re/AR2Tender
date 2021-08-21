@@ -10,7 +10,9 @@ use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
 use App\Http\Controllers\LocWithConnectControllers\LocationController;
 use App\Http\Controllers\TenderRelatedControllers\TenderController;
-
+use App\Http\Controllers\TenderRelatedControllers\FileController;
+use App\Http\Controllers\TenderRelatedControllers\SupplierFileController;
+use App\Http\Controllers\TenderRelatedControllers\TenderFileController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -71,12 +73,34 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
 });
 
 
-
 Route::group(['prefix' => 'tenders'], function () {
 
-    Route::group(['prefix' => 'filter'], function () {
-        Route::post("category", [TenderController::class,'indexFilterOnCategory']);
-        Route::post("date", [TenderController::class,'indexFilterOnDate']);
-    });
-
+    
+    Route::get("filter",[TenderController::class,'filter']);
+    Route::get("indexSearch",[TenderController::class,'indexSearch']);
+    Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);
+    Route::get("indexSubmittedTo",[TenderController::class,'indexSubmittedTo']);
+    
+    
 });
+Route::group(['prefix' => 'tender'], function () {
+
+    //maybe I will change the route to be like this.. and remove the id from the body
+    //Route::post("storefiles/{tender_id}",[TenderFileController::class,'store'])->whereNumber('tender_id');
+    Route::post("storefiles",[TenderFileController::class,'store']);
+    Route::get("indexfiles",[TenderFileController::class,'index']);
+    
+});
+Route::group(['prefix' => 'supplier'], function () {
+
+    //maybe I will change the route to be like this.. and remove the id from the body
+    //Route::post("storefiles/{submit_form_id}",[SupplierFileController::class,'store'])->whereNumber('submit_form_id');
+    Route::post("storefiles",[SupplierFileController::class,'store']);
+    Route::get("indexfiles",[SupplierFileController::class,'index']);
+    
+    
+});
+Route::post("getUser",[UserAuthController::class,'getUser']);
+Route::get("index/{directory}",[FileController::class,'oneindex']);
+
+Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);

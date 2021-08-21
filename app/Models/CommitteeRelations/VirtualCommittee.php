@@ -21,6 +21,6 @@ class VirtualCommittee extends Model
         return $this->belongsTo(Company::class,'company_id');
     }
     public function VirtualCommitteeTender(){
-        return $this->hasMany(VirtualCommitteeMember::class,'virtual_committee_member_id');
+        return $this->hasMany(VirtualCommitteeMember::class,'virtual_committee_id');
     }
 }

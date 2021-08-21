@@ -14,6 +14,7 @@ class CreateCommitteeMembersTable extends Migration
     public function up()
     {
         Schema::create('committee_members', function (Blueprint $table) {
+            $table->bigIncrements('committee_member_id')->unique();
             $table->unsignedBigInteger('committee_id');
             $table->unsignedBigInteger('employee_id');
             $table->foreign('committee_id')->references('committee_id')->on('committees')->onDelete('cascade');

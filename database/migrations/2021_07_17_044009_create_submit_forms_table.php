@@ -14,6 +14,8 @@ class CreateSubmitFormsTable extends Migration
     public function up()
     {
         Schema::create('submit_forms', function (Blueprint $table) {
+            $table->bigIncrements('committee_member_id')->unique();
+
             $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('tender_id');
             $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');

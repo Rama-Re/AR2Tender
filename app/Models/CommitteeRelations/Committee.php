@@ -20,6 +20,6 @@ class Committee extends Model
         return $this->belongsTo(Tender::class,'tender_id');
     }
     public function CommitteeMember(){
-        return $this->hasMany(CommitteeMember::class,'tender_id');
+        return $this->hasMany(CommitteeMember::class,'committee_id');
     }
 }

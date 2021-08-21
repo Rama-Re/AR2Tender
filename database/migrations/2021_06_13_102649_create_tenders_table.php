@@ -15,7 +15,9 @@ class CreateTendersTable extends Migration
             $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
             $table->string('Title');
             $table->text('description');
-            $table->enum('type', ['Open', 'Selective'])->default('Open');
+            $table->boolean('active'); // make it to public or save as draft
+            $table->enum('type', ['open', 'selective'])->default('Open');
+            $table->enum('selective',['companies','specialty','countries'])->nullable();
             $table->enum('category', ['medical', 'engineering-related','Raw materials','technical','technology-related','Other'])->default('Other');
         });
     }

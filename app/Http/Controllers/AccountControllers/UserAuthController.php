@@ -35,7 +35,7 @@ class UserAuthController extends Controller
             //Send failed response if request is not valid
             if ($validator->fails()) {
                 $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
+                return $generalTrait->returnValidationError($validator,$code);
             }
             else return $generalTrait->returnSuccessMessage('validated');
         } catch (\Exception $e) {
@@ -52,7 +52,7 @@ class UserAuthController extends Controller
             //Send failed response if request is not valid
             if ($validator->fails()) {
                 $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
+                return $generalTrait->returnValidationError($validator);
             }
             else return $generalTrait->returnSuccessMessage('validated');
         } catch (\Exception $e) {
@@ -82,7 +82,7 @@ class UserAuthController extends Controller
             //Send failed response if request is not valid
             if ($validator->fails()) {
                 $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
+                return $generalTrait->returnValidationError($validator,$code);
             }
             
             $credentials = $request->only(['email', 'password', 'type']);
@@ -93,7 +93,7 @@ class UserAuthController extends Controller
                 return $generalTrait->returnError('E001', 'Email or Password is wrong');
             }
             $user = JWTAuth::user();
-            return $generalTrait->returnDatawithToken('user', $user,"Logged in successfully",$token);
+            return $generalTrait->returnDatawithToken('user', $user,$token,"Logged in successfully");
             
         } catch (\Exception $e) {
             return $generalTrait->returnError($e->getCode(), $e->getMessage());

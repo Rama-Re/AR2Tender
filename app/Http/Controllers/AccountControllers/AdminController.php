@@ -22,7 +22,7 @@ class AdminController extends Controller
     public static function validation(Request $request){
         $generalTrait = new GeneralTrait;
         try {
-            $validator = Validator::make($request->only('admin_name'), [
+            $validator = Validator::make($request->only('admin_name','type'), [
                 'admin_name' => 'required',
                 'type'=>'required|in:admin'
             ]);

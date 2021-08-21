@@ -14,13 +14,10 @@ class CreateSupplierFilesTable extends Migration
     public function up()
     {
         Schema::create('supplier_files', function (Blueprint $table) {
+
             $table->bigIncrements('supplier_file_id')->unique();
             $table->unsignedBigInteger('submit_form_id');
-            $table->foreign('submit_form_id')->references('company_id','tender_id')->on('submit_forms')->onDelete('cascade');
-            $table->string('name');
-            $table->unsignedBigInteger('size');
-            $table->string('path');
-            $table->enum('type',['financial requirement','technician requirement','other']);
+            $table->foreign('submit_form_id')->references('submit_form_id')->on('submit_forms')->onDelete('cascade');
             $table->timestamps();
             
         });

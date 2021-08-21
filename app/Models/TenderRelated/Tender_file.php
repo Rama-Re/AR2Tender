@@ -11,7 +11,11 @@ class Tender_file extends Model
     protected $table = 'tender_files';
     protected $primaryKey = 'tender_file_id';
 
-    protected $attributes = [
-        'type' => 'other',
-    ];
+
+    public function scopeIndex($query,$tender_id)
+    {
+        return $query->select('name','size','path','type')
+        ->join('files', 'files.file_id', '=', 'tender_files.file_id')
+        ->where('tender_id','=',$tender_id);
+    }
 }

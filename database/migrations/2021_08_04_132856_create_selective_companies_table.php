@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTenderFilesTable extends Migration
+class CreateSelectiveCompaniesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateTenderFilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('tender_files', function (Blueprint $table) {
-            $table->bigIncrements('tender_file_id')->unique();
+        Schema::create('selective_companies', function (Blueprint $table) {
+            $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('tender_id');
+            $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
             $table->foreign('tender_id')->references('tender_id')->on('tenders')->onDelete('cascade');
-            $table->timestamps();
+            $table->primary(['company_id','tender_id'],'selective_company_id')->unique();
+               
         });
     }
 
@@ -28,6 +30,6 @@ class CreateTenderFilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tender_files');
+        Schema::dropIfExists('selective_companies');
     }
 }

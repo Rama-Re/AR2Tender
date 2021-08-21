@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateFilesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('files', function (Blueprint $table) {
+            $table->bigIncrements('file_id')->unique();
+            $table->text('name');
+            $table->string('size');
+            $table->text('path');
+            $table->enum('type',['financial requirement','technician requirement','other']);
+            $table->enum('belongsto', ['tender', 'supplier']);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('files');
+    }
+}

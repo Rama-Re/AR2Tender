@@ -16,4 +16,24 @@ class Tender extends Model
         'type' => 'Open',
         'category' => 'Other',
     ];
+
+    public function scopeIndex($query)
+    {
+        return $query->select('tenders.tender_id', 'end_date', 'Title', 'company_name', 'image','image_path')
+        ->join('tender_track', 'tender_track.tender_id', '=', 'tenders.tender_id')
+        ->join('companies', 'tenders.company_id', '=', 'companies.company_id');
+
+    }
+    public function scopePublic($query)
+    {
+        return $query->whereNull('tenders.selective')
+        ->orWhere('tenders.selective', '!=', 'companies')
+        ->where('tenders.active','=',true);
+
+    }
+    public function scopeActive($query){
+        return $query->where('tenders.active','=',true);
+    }
+    
+
 }

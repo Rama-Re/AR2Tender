@@ -20,7 +20,7 @@ class CreateCompanyLocationsTable extends Migration
             $table->unsignedBigInteger('location_id');
             $table->foreign('location_id')->references('location_id')->on('locations')->onDelete('cascade');
             $table->timestampTz('set_up_date', $precision = 0);
-            $table->unsignedInteger('branch_count')->unique();
+            $table->unsignedInteger('branch_count');
             $table->timestamps();
         });
     }

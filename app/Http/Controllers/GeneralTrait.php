@@ -95,6 +95,9 @@ class GeneralTrait extends Controller
         if($input == "type"){
             return 'E008';
         }
+        if($input=="file"){
+            return 'E009';
+        }
         else return 'E000';
         
     }

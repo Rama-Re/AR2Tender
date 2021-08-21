@@ -9,9 +9,9 @@ use App\Http\Controllers\AccountControllers\UserController;
 use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
 use App\Http\Controllers\LocWithConnectControllers\LocationController;
-use App\Http\Controllers\TenderRelatedControllers\TenderController;
 use App\Http\Controllers\TenderRelatedControllers\FileController;
 use App\Http\Controllers\TenderRelatedControllers\SupplierFileController;
+use App\Http\Controllers\TenderRelatedControllers\TenderController;
 use App\Http\Controllers\TenderRelatedControllers\TenderFileController;
 /*
 |--------------------------------------------------------------------------

@@ -12,10 +12,12 @@ use App\Models\LocationWithConnect\CompanyLocation;
 use App\Models\LocationWithConnect\Country;
 use App\Models\LocationWithConnect\Location;
 use App\Models\LocationWithConnect\Phone;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class CompanyController extends Controller
 {    
@@ -169,4 +171,25 @@ class CompanyController extends Controller
         }
         return response()->json($generalTrait -> returnError('403','something went wrong'));
     }
+    public static function getCompanyId($id)
+    {
+        // the id sent is the user id 
+        # code...
+        $generalTrait = new GeneralTrait;
+        $userID = User::find($id);
+        
+        if($userID->type=='company'){
+            
+            $companyID = Company::select('company_id')->where('companies.user_id','=',$userID->user_id)->get();
+            //$companyID = DB::table('companies')->select('company_id')->where('companies.user_id','==',$userID)->get();
+            
+
+            $id = $companyID->map->only(['company_id'])->first()["company_id"];
+            return is_numeric($id)?$id: $generalTrait->returnError('404',"error happened while getting the company");
+        }
+        else{
+            return $userID->type;
+        }
+    }
+    
 }

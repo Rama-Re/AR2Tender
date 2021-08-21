@@ -1,9 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\CommitteeController;
+
+use App\Http\Controllers\AccountControllers\UserAuthController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
 use App\Http\Controllers\MyValidator;
+use App\Models\Account\Employee;
+use App\Models\CommitteeRelations\Committee;
 use App\Models\CommitteeRelations\CommitteeMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -48,5 +52,26 @@ class CommitteeMemberController extends Controller
             if(!$committeeMember) return false;
         }
         return true;
+    }
+    public static function getTenderId($committee_member_id)
+    {
+        $committee_id = CommitteeMember::find($committee_member_id)->get('committee_id')->first();
+        if(!$committee_id) return -1;
+        $tender_id = Committee::find($committee_id->committee_id)->get('tender_id')->first();
+        if(!$tender_id) return -1;
+        return $tender_id->tender_id;
+    }
+    public function getCommitteeMemberFromToken(Request $request)
+    {
+        if(!$request->has('tender_id')){
+            return GeneralTrait::returnError('404','tender_id is required');
+        }
+        $user = (UserAuthController::getUser($request))['user'];
+        $user_id = $user->user_id;
+        $employee_id = Employee::where('user_id',$user_id)->get('employee_id')->first()->employee_id;
+        $committee_member = CommitteeMember::where('employee_id',$employee_id)
+        ->where('tender_id',$request->tender_id)->get()->first();
+        if($committee_member) return GeneralTrait::returnData('committee_member',$committee_member);
+        return GeneralTrait::returnError('404','you are not member at any committee of this tender');
     }
 }

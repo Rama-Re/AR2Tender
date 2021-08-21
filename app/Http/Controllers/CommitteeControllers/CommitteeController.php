@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\CommitteeController;
+
+use App\Http\Controllers\AccountControllers\UserAuthController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
 use App\Http\Controllers\MyValidator;
@@ -67,5 +69,19 @@ class CommitteeController extends Controller
             return response()->json(GeneralTrait::returnError('404','this VirtualCommittee doesn\'t exist'));
         }
         else return response()->json($result);
+    }
+    public function getCommitteeFromToken(Request $request)
+    {
+        if(!$request->has('tender_id')){
+            return GeneralTrait::returnError('404','tender_id is required');
+        }
+        $committee_member = (new CommitteeMemberController)->getCommitteeMemberFromToken($request);
+        if(!$committee_member['status']){
+            return response()->json(GeneralTrait::returnError('404','you are not member at any committee of this tender'));
+        }
+        $committee_id = $committee_member['committee_member']->committee_id;
+        $committee = Committee::find($committee_id)->get();
+        if($committee) return response()->json(GeneralTrait::returnData('committee',$committee));
+        return response()->json(GeneralTrait::returnError('404','you are not member at any committee of this tender'));
     }
 }

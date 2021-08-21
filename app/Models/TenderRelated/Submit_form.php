@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 class Submit_form extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'submit_form_id',
+        'tender_id',
+        'company_id'
+    ];
     protected $table = 'submit_forms';
     protected $primaryKey = 'submit_form_id'; //the name is just neglecated
     public $incrementing = false;

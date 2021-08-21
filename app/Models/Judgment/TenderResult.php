@@ -22,9 +22,6 @@ class TenderResult extends Model
     protected $hidden = [
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
     public function Submit_form(){
         return $this->belongsTo(Submit_form::class,'submit_form_id');
     }

@@ -188,10 +188,8 @@ class CompanyController extends Controller
         if($userID->type=='company'){
             
             $companyID = Company::select('company_id')->where('companies.user_id','=',$userID->user_id)->get();
-            //$companyID = DB::table('companies')->select('company_id')->where('companies.user_id','==',$userID)->get();
-            
-
             $id = $companyID->map->only(['company_id'])->first()["company_id"];
+            
             return is_numeric($id)?$id: $generalTrait->returnError('404',"error happened while getting the company");
         }
         else{

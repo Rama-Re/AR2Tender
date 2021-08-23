@@ -13,7 +13,7 @@ class CreateTendersTable extends Migration
             $table->bigIncrements('tender_id')->unique();
             $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
-            $table->string('Title');
+            $table->string('title');
             $table->text('description');
             $table->boolean('active'); // make it to public or save as draft
             $table->enum('type', ['open', 'selective'])->default('Open');

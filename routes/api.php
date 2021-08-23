@@ -64,7 +64,7 @@ Route::group(['middleware' => ['checkToken','checkType:employee']], function () 
 
 Route::group(['prefix' => 'tenders'], function () {
 
-    
+    Route::post("/",[TenderController::class,'store']);
     Route::get("filter",[TenderController::class,'filter']);
     Route::get("indexSearch",[TenderController::class,'indexSearch']);
     Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);
@@ -91,7 +91,5 @@ Route::group(['prefix' => 'supplier'], function () {
 });
 Route::post("getUser",[UserAuthController::class,'getUser']);
 Route::get("index/{directory}",[FileController::class,'oneindex']);
-
-Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
 
 

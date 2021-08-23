@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
 use Lcobucci\JWT\Signer\Ecdsa\Sha512;
 use PhpParser\Node\Stmt\Else_;
 
+use function PHPUnit\Framework\returnSelf;
+
 class FileController extends Controller
 {
     public static function decryptCollection($files){
@@ -61,12 +63,12 @@ class FileController extends Controller
             }
             return $generalTrait->returnError('402', $mes);
         } else {
-            return $generalTrait->returnSuccessMessage("uploaded successfully");
+            return true;
         }
     }
 
     public static function storeFiles(Request $request, $belongsto)
-    {
+    { 
         $generalTrait = new GeneralTrait;
         $notAccepted = array();
         if ($request->hasFile('file')) {
@@ -102,23 +104,44 @@ class FileController extends Controller
 
     }
 
+    public static function hashFile ($filePath){ 
+        // if extension is pdf convert it to txt
+        try{
+            $handle = fopen($filePath,'r');
+            $oFileContent = fread($handle,filesize($handle));
+            fclose($handle);
+            $encryptedFileContent=Crypt::encryptString($oFileContent);
+            $handle1 = fopen($filePath,'w');
+            fwrite($handle1,$encryptedFileContent);
+            fclose($handle1);
+            return true;
+        }catch(Exception $e){
+            return false;
+        }
+        
+        // change from text to pdf if pdf
+    }
+
     public static function store(Request $request, $belongsto)
     {
 
         $files = array();
-        
+
         foreach ($request->file as $file) {
+            $res = self::hashFile($file->getClientOriginalName());
+                
            // if ($file->extension() == 'pdf') {
                 $fileToDB = new File;
                 $name = $file->getClientOriginalName();
+                
                 $fileToDB->name = Crypt::encryptString(time() . '%' . $name); // I put the % to make it easy to get the name without the time
-        
                 $fileToDB->type = $request->fileType; // 'financial requirement','technician requirement','other'
                 $fileToDB->belongsto = $belongsto; //'tender', 'supplier'
                 $fileToDB->path = Crypt::encryptString($path =$file->store('public/files/' . $belongsto)); // maybe I should hash here
                 $fileToDB->size = NumberHelper::readableSize(Storage::size($path)); //not woked
                 $fileToDB->save();
                 array_push($files, $fileToDB->file_id);
+               
            // } else {
             //    array_push($files, Crypt::encryptString($path =$file->store('public/files/' . $belongsto)));
             //}

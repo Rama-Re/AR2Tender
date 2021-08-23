@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Stmt\Return_;
 
+use function GuzzleHttp\Promise\exception_for;
+
 class TenderController extends Controller
 {
     //use GeneralTrait;
@@ -298,6 +300,45 @@ class TenderController extends Controller
         return $generalTrait->returnData('tenders',$tendersInvited);
 
     }
+    public function store(Request $request){
+        $generalTrait = new GeneralTrait;
+        $result = $this->checkAndGetCompanyID($request);
 
+        if(!is_numeric($result)){
+            // if the id is not numeric then it is a json response and not companyId
+            return $result;
+        }
+        try{
+            $tender = Tender::create([
+                'company_id' => $result,
+                'title' => $request->title,
+                'description' =>$request->description,
+                'active' => $request->active,
+                'type' => $request->type,
+                'category' => $request->category,
+            ]);
+            
+        }catch(Exception $e){
+            return $generalTrait->returnError('401',$e->__toString());
+            //return $generalTrait->returnError('401',"couldn't save the tender");
+        }
+        try{
+            if($request->type == 'selective'){
+                $tender->fill(['selective' => $request->selective]);
+                SelectiveTenderController::storeSelective($request,$tender->tender_id);
+            }
+        }catch(Exception $e){
+             // delete the selective on ($request->selective) and the tender if found
+            return $generalTrait->returnError('401',"couldn't save the ".$request->selective);
+        }
+       try{
+           TenderTrackController::store($request,$tender->tender_id);
+       } catch(Exception $e){
+           // delete the selective on ($request->selective) and the tender and the tender track if found
+        return $generalTrait->returnError('401',"couldn't save the track of the tender");
+       }
+       return $generalTrait->returnData('tender_id',$tender->tender_id,"the tender stored successfully");
+    }
+    
 
 }

@@ -10,6 +10,7 @@ class Tender extends Model
     use HasFactory;
     protected $table = 'tenders';
     protected $primaryKey = 'tender_id';
+    protected $fillable = ['title','description','active','type','selective','category'];
     public $timestamps = false;
 
     protected $attributes = [

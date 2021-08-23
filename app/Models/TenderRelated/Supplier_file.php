@@ -15,6 +15,6 @@ class Supplier_file extends Model
     {
         return $query->select('name','size','path','type')
         ->join('files', 'files.file_id', '=', 'supplier_files.file_id')
-        ->where('submit_form_id','=',$submitId);;
+        ->where('submit_form_id','=',$submitId);
     }
 }

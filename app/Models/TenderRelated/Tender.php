@@ -18,6 +18,10 @@ class Tender extends Model
         'category' => 'Other',
     ];
 
+    public function TenderResult(){
+        return $this->hasOne(TenderResult::class,'tender_id');
+    }
+
     public function scopeIndex($query)
     {
         return $query->select('tenders.tender_id', 'end_date', 'Title', 'company_name', 'image','image_path')

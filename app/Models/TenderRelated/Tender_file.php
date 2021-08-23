@@ -18,4 +18,7 @@ class Tender_file extends Model
         ->join('files', 'files.file_id', '=', 'tender_files.file_id')
         ->where('tender_id','=',$tender_id);
     }
+    protected $attributes = [
+        'type' => 'other',
+    ];
 }

@@ -4,7 +4,11 @@ namespace App\Http\Controllers\AccountControllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
 use App\Models\Account\Employee;
+use App\Models\Account\Company;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,22 +16,10 @@ use Illuminate\Support\Facades\Validator;
 class EmployeeController extends Controller
 {
     public static function validation(Request $request){
-        $generalTrait = new GeneralTrait;
-        try {
-            $data = $request->only('employee_name','company_id');
-            $validator = Validator::make($data, [
-                'employee_name' => 'required|string',
-                'company_id'=> 'required'
-            ]);
-            //Send failed response if request is not valid
-            if ($validator->fails()) {
-                $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
-            }
-            else return $generalTrait->returnSuccessMessage('validated');
-        } catch (\Exception $e) {
-            return $generalTrait->returnError($e->getCode(), $e->getMessage());
-        }
+        return MyValidator::validation($request->only('employee_name','company_id'), [
+            'employee_name' => 'required|string',
+            'company_id'=> 'required'
+        ]);
     }
     public function register(Request $request){
         $generalTrait = new GeneralTrait;
@@ -42,6 +34,9 @@ class EmployeeController extends Controller
                 $employee->employee_name = $request->employee_name;
                 $employee->company_id = $request->company_id;
                 $employee->user_id = ($response["user"])->user_id;
+                $user = User::find(($response["user"])->user_id);
+                $user->is_verified = true;
+                $user->save();
                 //$employee->user_id = 1;
                 $employee->save();
                 
@@ -58,16 +53,15 @@ class EmployeeController extends Controller
         if($response["status"]){
             $result = UserAuthController::getUser($request);
             if($result["status"]){
-                $employee = Employee::where('user_id',$result["user"]->user_id)->get();
+                $employee = Employee::where('user_id',$result["user"]->user_id)->get()->first();
                 if (!$employee) {
-                    return $generalTrait->returnError('404', 'Not Found');
+                    return response()->json($generalTrait->returnError('404', 'Not Found'));
                 }
                 
-                return $generalTrait->returnData('employee', $employee);
+                return response()->json($generalTrait->returnData('employee', $employee));
             }
         }
-        return $response;
-        $response = UserAuthController::validationToken($request);
+        return response()->json($response);
     }
     public function index(){
         $generalTrait = new GeneralTrait;
@@ -81,5 +75,41 @@ class EmployeeController extends Controller
             return $generalTrait->returnError('401', 'this employee is not found');
         }
         return $generalTrait->returnData('employee', $employee);
+    }
+    public function getAllCompanyEmployees(Request $request){
+        $generalTrait = new GeneralTrait;
+        $employees = Employee::where('company_id',$request->company_id)->get();
+        if (!$employees) {
+            return $generalTrait->returnError('401', 'there is\'t employees in this company');
+        }
+        return $generalTrait->returnData('employees', $employees);
+    }
+    public function sentEmailToRegister(Request $request)
+    {
+        $response = UserAuthController::validationToken($request);
+        if($response["status"]){
+            $result = UserAuthController::getUser($request);
+            if($result["status"]){
+                $company_name = Company::where('user_id',$result["user"]->user_i)->get('company_name')->first();
+                $details = [
+                    'title'=> $company_name.'\nYou have to sign in at AR2Tender Application with this account',
+                    'body'=> 'email: '.$request->email.'\npassword: '.$request->password
+                ];
+                Mail::to($request->email)->send(new \App\Mail\SampleMail($details));
+                return response()->json(GeneralTrait::returnSuccessMessage('email send successfully'));
+            }
+            else return response()->json($result);
+        }
+        else return response()->json($response);
+    }
+    
+    public function destroyUser(Request $request)
+    {
+        $user = User::where('email',$request->email)->get()->first();
+        if($user) {
+            $user->delete();
+            return response()->json(GeneralTrait::returnSuccessMessage('Account deleted succesfully'));
+        }
+        return response()->json(GeneralTrait::returnError('404', 'Not Found'));
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVirtualCommitteeTendersTable extends Migration
+class AddBlockedAtToUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,12 +12,11 @@ class CreateVirtualCommitteeTendersTable extends Migration
      * @return void
      */
     public function up()
-    {
-        Schema::create('virtual_committee_tenders', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->boolean('blocked')->default(false);
+    });
+}
 
     /**
      * Reverse the migrations.
@@ -26,6 +25,8 @@ class CreateVirtualCommitteeTendersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('virtual_committee_tenders');
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
     }
 }

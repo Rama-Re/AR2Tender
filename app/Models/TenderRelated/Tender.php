@@ -17,6 +17,10 @@ class Tender extends Model
         'type' => 'Open',
         'category' => 'Other',
     ];
+    
+    public function TenderResult(){
+        return $this->hasOne(TenderResult::class,'tender_id');
+    }
 
     public function TenderResult(){
         return $this->hasOne(TenderResult::class,'tender_id');

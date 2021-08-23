@@ -4,6 +4,7 @@ namespace App\Http\Controllers\AccountControllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
 use App\Models\Account\Admin;
 use App\Models\User;
 use Exception;
@@ -20,22 +21,10 @@ class AdminController extends Controller
     //use App\Http\Traits\GeneralTrait;
     //edit
     public static function validation(Request $request){
-        $generalTrait = new GeneralTrait;
-        try {
-            $validator = Validator::make($request->only('admin_name','type'), [
-                'admin_name' => 'required',
-                'type'=>'required|in:admin'
-            ]);
-
-            //Send failed response if request is not valid
-            if ($validator->fails()) {
-                $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
-            }
-            else return $generalTrait->returnSuccessMessage("validated");
-        } catch (\Exception $e) {
-            return $generalTrait->returnError($e->getCode(), $e->getMessage());
-        }
+        return MyValidator::validation($request->only('admin_name','type'), [
+            'admin_name' => 'required',
+            'type'=>'required|in:admin'
+        ]);
     }
     
     public function getProfile(Request $request){
@@ -44,7 +33,7 @@ class AdminController extends Controller
         if($response["status"]){
             $result = UserAuthController::getUser($request);
             if($result["status"]){
-                $admin = Admin::where('user_id',$result["user"]->user_id)->get();
+                $admin = Admin::where('user_id',$result["user"]->user_id)->get()->first();
                 if (!$admin) {
                     return $generalTrait->returnError('404', 'not found');
                 }
@@ -78,4 +67,8 @@ class AdminController extends Controller
         
     }
 
+    public function updateProfile(Request $request)
+    {
+        # code...
+    }
 }

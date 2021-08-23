@@ -20,6 +20,7 @@ class User extends Authenticatable implements JWTSubject ,MustVerifyEmail
         'user_id',
         'type',
         'is_verified',
+        'blocked'
     ];
        
     protected $primaryKey = 'user_id';

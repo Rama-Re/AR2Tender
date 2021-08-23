@@ -24,6 +24,12 @@ class CommitteeMember extends Model
         return $this->belongsTo(Employee::class,'employee_id');
     }
     public function Committee(){
-        return $this->hasMany(Committee::class,'committee_id');
+        return $this->belongsTo(Committee::class,'committee_id');
+    }
+    public function JudgmentOfCommittee(){
+        return $this->hasMany(JudgmentOfCommittee::class,'committee_member_id');
+    }
+    public function TenderResult(){
+        return $this->hasOne(TenderResult::class,'committee_member_id');
     }
 }

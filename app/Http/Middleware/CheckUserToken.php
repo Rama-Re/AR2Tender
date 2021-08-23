@@ -15,7 +15,11 @@ class CheckUserToken
         $generalTrait = new GeneralTrait;
         $user = null;
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $token = $request->header('token');
+            $request->headers->set('token',(string)$token,true);
+            $request->headers->set('Authorization','Bearer '.$token,true);
+
+            $user = JWTAuth::parseToken()->authenticate($request);
         } catch(\Exception $e){
             if($e instanceof TokenInvalid)
                 return response()->json($generalTrait -> returnError('401','INVALID_TOKEN'));

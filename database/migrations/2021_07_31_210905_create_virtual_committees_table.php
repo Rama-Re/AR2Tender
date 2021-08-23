@@ -14,7 +14,10 @@ class CreateVirtualCommitteesTable extends Migration
     public function up()
     {
         Schema::create('virtual_committees', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('virtual_committee_id')->unique();
+            $table->unsignedBigInteger('company_id');
+            $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
+            $table->enum('type',['financial','technician','decision maker']);
             $table->timestamps();
         });
     }

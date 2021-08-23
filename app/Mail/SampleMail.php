@@ -10,15 +10,18 @@ use Illuminate\Queue\SerializesModels;
 class SampleMail extends Mailable
 {
     use Queueable, SerializesModels;
-
+    public $details;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($details)
     {
-        //
+        $this->details = [
+            'title' => $details['title'],
+            'body' => $details['body']
+        ];
     }
 
     /**
@@ -28,6 +31,6 @@ class SampleMail extends Mailable
      */
     public function build()
     {
-        return $this->from("artwotender@gmail.com")->markdown('emails.SampleMail');
+        return $this->subject('Mail from AR2Tender')->from("artwotender@gmail.com")->view('emails.SampleMail');
     }
 }

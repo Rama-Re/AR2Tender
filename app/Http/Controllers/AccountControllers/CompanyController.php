@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AccountControllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
 use App\Http\Controllers\LocWithConnectControllers\CompanyLocationController;
+use App\Http\Controllers\MyValidator;
 use App\Models\Account\Admin;
 use App\Models\Account\Company;
 use App\Models\LocationWithConnect\CompanyLocation;
@@ -21,11 +22,9 @@ use Illuminate\Support\Facades\DB;
 class CompanyController extends Controller
 {    
     public static function validation(Request $request){
-        $generalTrait = new GeneralTrait;
-        try {
-            $data = $request->only('company_name','type', 'director_name','username','image','image_path','specialty','about_us','locations');
-            $validator = Validator::make($data, [
-                'type' => 'required|in:company',
+        return MyValidator::validation($request->only('company_name','type', 'director_name','username','image','image_path','specialty','about_us','locations'),
+         [
+            'type' => 'required|in:company',
                 'company_name' => 'required|string',
                 'director_name' => 'required|string',
                 'username' => 'required|string',
@@ -37,33 +36,15 @@ class CompanyController extends Controller
                 'locations' => 'required|array',
                 'locations.*.location_id'=> 'required',
                 'locations.*.branch_count'=>'required'
-            ]);
-            
-            //Send failed response if request is not valid
-            if ($validator->fails()) {
-                $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
-            }
-            else return $generalTrait->returnSuccessMessage('validated');
-        } catch (\Exception $e) {
-            return $generalTrait->returnError($e->getCode(), $e->getMessage());
-        }
+        ]);
     }
     public function uploadCompanyPhoto(Request $request){
         $generalTrait = new GeneralTrait;
-        try {
-            $data = $request->only('image');
-            $validator = Validator::make($data, [
-                'image'=> 'required|mimes:png,jpg,jpeg,gif|max:2305',
-            ]);
-            
-            //Send failed response if request is not valid
-            if ($validator->fails()) {
-                $code = $generalTrait->returnCodeAccordingToInput($validator);
-                return $generalTrait->returnValidationError($code, $validator);
-            }
-        } catch (\Exception $e) {
-            return $generalTrait->returnError($e->getCode(), $e->getMessage());
+        $result = MyValidator::validation($request->only('image'),[
+            'image'=> 'required|mimes:png,jpg,jpeg,gif|max:2305',
+        ]);
+        if(!$result['status']){
+            return $result;
         }
         
         if($file = $request->file('image'))
@@ -109,7 +90,11 @@ class CompanyController extends Controller
         }
         else return response()->json($result);
     }
-    
+    public static function getUserID(Request $request){
+        $generalTrait = new GeneralTrait;
+        $user_id = Company::find($request->company_id)->get('user_id');
+        return $generalTrait ->returnData('user_id',$user_id);
+    }
     public function getAll(){
         $generalTrait = new GeneralTrait;
         $companies = Company::get();
@@ -129,9 +114,15 @@ class CompanyController extends Controller
                 $locations = array();
                 $count = 0;
                 foreach($locationsID as $branch){
-                    $phones = Phone::join('company_locations','company_locations.company_location_id','phones.company_location_id')
+                    $phone_numbers = Phone::join('company_locations','company_locations.company_location_id','phones.company_location_id')
                     ->where('company_locations.company_location_id',$branch->company_location_id)
                     ->get('phone_number');
+                    $i=0;
+                    $phones = array();
+                    foreach($phone_numbers as $phone){
+                        $phones[$i] = $phone->phone_number;
+                        $i++;
+                    }
                     $location = Location:: where('location_id',$branch->location_id)->get('location_name')->first()->location_name;
                     $country_id = Location:: where('location_id',$branch->location_id)->get('country_id')->first()->country_id;
                     $country = Country::where('country_id',$country_id)->get('country_name')->first()->country_name;
@@ -163,7 +154,9 @@ class CompanyController extends Controller
     
     public function changeStatus(Request $request){
         $generalTrait = new GeneralTrait;
-        $company = Company::find($request->company_id);
+        $user = UserAuthController::getUser($request)['user'];
+        $user_id = $user['user_id'];
+        $company = Company::where('user_id',$user_id)->get()->first();
         if(Company::find($request->company_id)->get('status')->first()->status == 'TenderOffer')
         {
             $company->status = 'TendersManager';

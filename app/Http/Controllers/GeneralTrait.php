@@ -14,15 +14,6 @@ class GeneralTrait extends Controller
             'msg' => $msg,
         ];
     }
-/*
-    public function returnSuccessMessage($msg = "", $errNum = "5000")
-    {
-        return response()->json(['status' => true,
-            'errNum' => $errNum,
-            'msg' => $msg,
-        ]);
-    }
-    */
     
     public static function returnSuccessMessage($msg = "", $errNum = "200")
     {

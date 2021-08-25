@@ -50,11 +50,8 @@ Route::get("/", function(){
     } else {
         return $generalTrait->returnSuccessMessage("uploaded successfully");
     }
-    dd(Storage::files('storage\app\public'));
-    dd(StringHelperFunctions::between_last('/','.pdf',$str));
+    //dd(Storage::files('storage\app\public'));
+    //dd(StringHelperFunctions::between_last('/','.pdf',$str));
 
 });
 
-
-//Route::get("/", function(){return new SampleMail();});
-Route::get("register", [AdminController::class,'register']);

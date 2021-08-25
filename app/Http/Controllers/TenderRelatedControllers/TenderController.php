@@ -7,6 +7,9 @@ use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\UserAuthController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
+use App\Http\Controllers\NotificationController;
+use App\Models\Account\Company;
 use App\Models\TenderRelated\SelectiveCompany;
 use App\Models\TenderRelated\Tender;
 use App\Models\TenderRelated\Tender_track;
@@ -272,18 +275,43 @@ class TenderController extends Controller
         $tender_id = $request->tender_id;
         $tender= Tender::find($tender_id);
         if (!$tender) {
-            return response()->json($generalTrait->returnError('401', 'this company is not found'));
+            return $generalTrait->returnError('401', 'this company is not found');
         }
         if($tender->company_id == $result  && $tender->selective == 'companies'){
-           $companiesEmail =  SelectiveCompany::select('email')
+           $fcm_tokens =  SelectiveCompany::select('fcm_tokens.fcm_token')
            ->join('companies','companies.company_id','=','selective_companies.company_id')
            ->join('users', 'users.user_id', '=', 'companies.user_id')
+           ->join('fcm_tokens','fcm_tokens.user_id','=','users.user_id')
            ->where('tender_id','=',$tender_id)->get();
-           return $generalTrait->returnData('emails',$companiesEmail);
+           return $generalTrait->returnData('fcm_tokens',$fcm_tokens);
         }else{
            return $generalTrait->returnError('401','the tender does not belong to this company or the tender is not company selective');
         }
 
+    }
+    public function notifyInvitedUsers(Request $request)
+    {
+        $user_id = UserAuthController::getUser($request)['user']->user_id;
+
+        $result = MyValidator::validation($request->only('tender_id'),['tender_id'=>'required']);
+        if($result['status']){
+            $receivers = $this->emailsFromTender($request);
+            if($receivers['status']){
+                $company_name = Company::join('tenders','tenders.company_id','=','companies.company_id')
+                ->where('tenders.tender_id',$request->tender_id)
+                ->get('companies.company_name')->first()->company_name;
+                $tender_name = Tender::where('tender_id',$request->tender_id)->get('tender_name')->first()->tender_name;
+                $receivers = $receivers['fcm_tokens'];
+
+                $data = NotificationController::getNoti($company_name,'invited you to tender: '.$tender_name,$user_id);
+                if(!$data['status']){
+                    return response()->json(GeneralTrait::returnError('404','couldn\'t generate notifications'));
+                }
+                return response()->json(GeneralTrait::returnData('notify',compact($receivers,$data)));
+            }
+            else response()->json($receivers);
+        }
+        return response()->json($result);
     }
     public function tendersInvitedTo(Request $request){
         $generalTrait = new GeneralTrait;

@@ -5,6 +5,7 @@ use App\Http\Controllers\AccountControllers\UserAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\EmployeeController;
+use App\Http\Controllers\AccountControllers\FCMTokenController;
 use App\Http\Controllers\AccountControllers\UserController;
 use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
@@ -42,9 +43,13 @@ Route::group(['middleware' => ['verifyUser','active_user']], function () {
 Route::post("admin/register", [AdminController::class,'register']);
 
 Route::group(['middleware' => ['checkToken','active_user','verifyUser']], function () {
+    
+    Route::post("fcm/saveFCMToken", [FCMTokenController::class,'saveFCMToken']);
+
     ///***///
     //Admin Group
     ///***///
+    
     Route::group(['middleware' => ['checkType:admin']], function () {
         Route::post("saveCountries", [CountryController::class,'save']);
         Route::post("saveCities", [LocationController::class,'save']);

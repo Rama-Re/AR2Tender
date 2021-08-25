@@ -65,7 +65,7 @@ class JudgmentOfCommitteeController extends Controller
             $judgment->vote = $request->vote;
             $judgment->save();
             if(!$judgment) return response()->json(GeneralTrait::returnError('401','something went wrong'));
-            return response()->json(GeneralTrait::returnSuccessMessage('judgment added succesfully'));
+            return response()->json(GeneralTrait::returnSuccessMessage('judgment added successfully'));
         }
         return response()->json($result);
     }

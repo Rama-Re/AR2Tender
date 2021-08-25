@@ -25,17 +25,17 @@ class CompanyController extends Controller
         return MyValidator::validation($request->only('company_name','type', 'director_name','username','image','image_path','specialty','about_us','locations'),
          [
             'type' => 'required|in:company',
-                'company_name' => 'required|string',
-                'director_name' => 'required|string',
-                'username' => 'required|string',
-                'image'=> 'required|string',
-                'image_path' => 'required|string',
-                'specialty' => 'required|in:medical,engineering-related,Raw-materials,technical,technology-related,Other',
-                'status' => 'in:TenderOffer,TendersManager',
-                'about_us' => 'required',
-                'locations' => 'required|array',
-                'locations.*.location_id'=> 'required',
-                'locations.*.branch_count'=>'required'
+            'company_name' => 'required|string',
+            'director_name' => 'required|string',
+            'username' => 'required|string',
+            'image'=> 'required|string',
+            'image_path' => 'required|string',
+            'specialty' => 'required|in:medical,engineering-related,Raw-materials,technical,technology-related,Other',
+            'status' => 'in:TenderOffer,TendersManager',
+            'about_us' => 'required',
+            'locations' => 'required|array',
+            'locations.*.location_id'=> 'required',
+            'locations.*.branch_count'=>'required'
         ]);
     }
     public function uploadCompanyPhoto(Request $request){
@@ -157,13 +157,13 @@ class CompanyController extends Controller
         $user = UserAuthController::getUser($request)['user'];
         $user_id = $user['user_id'];
         $company = Company::where('user_id',$user_id)->get()->first();
-        if(Company::find($request->company_id)->get('status')->first()->status == 'TenderOffer')
+        if(Company::find($company->company_id)->get('status')->first()->status == 'TenderOffer')
         {
             $company->status = 'TendersManager';
             $company->save();
             return response()->json($generalTrait -> returnSuccessMessage('updated'));
         }
-        else if(Company::find($request->company_id)->get('status')->first()->status == 'TendersManager')
+        else if(Company::find($company->company_id)->get('status')->first()->status == 'TendersManager')
         {
             $company->status = 'TenderOffer';
             $company->save();

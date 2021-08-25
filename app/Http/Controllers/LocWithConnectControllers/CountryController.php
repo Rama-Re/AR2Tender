@@ -288,7 +288,7 @@ class CountryController extends Controller
                 ];
                 DB::table('countries')->insert($countriesarray);
             }
-            return $generalTrait->returnSuccessMessage('countries added succesfully');
+            return $generalTrait->returnSuccessMessage('countries added successfully');
         } else {
             return $generalTrait->returnData('countries',DB::table('countries')->get(),'countries already added');
         }

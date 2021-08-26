@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('confirm_code');
             $table->boolean('is_verified')->default(false);
+            $table->boolean('blocked')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
         });

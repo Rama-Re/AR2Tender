@@ -80,6 +80,7 @@ Route::group(['prefix' => 'tenders'], function () {
     Route::get("indexSearch",[TenderController::class,'indexSearch']);
     Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);
     Route::get("indexSubmittedTo",[TenderController::class,'indexSubmittedTo']);
+    Route::put("/{tender}",[TenderController::class,'update'])->whereNumber('tender'); // in the web this make a problem so we put inside the form @method('PUT')
     
     
 });
@@ -104,3 +105,4 @@ Route::post("getUser",[UserAuthController::class,'getUser']);
 Route::get("index/{directory}",[FileController::class,'oneindex']);
 
 Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
+

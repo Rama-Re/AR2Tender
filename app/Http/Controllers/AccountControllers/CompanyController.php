@@ -13,6 +13,7 @@ use App\Models\LocationWithConnect\Country;
 use App\Models\LocationWithConnect\Location;
 use App\Models\LocationWithConnect\Phone;
 use App\Models\User;
+use ErrorException;
 use Illuminate\Support\Facades\Validator;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class CompanyController extends Controller
     public function uploadCompanyPhoto(Request $request){
         $generalTrait = new GeneralTrait;
         $result = MyValidator::validation($request->only('image'),[
-            'image'=> 'required|mimes:png,jpg,jpeg,gif|max:2305',
+            'image'=> 'required|mimes:png,jpg,jpeg,gif|max:2305|unique:companies',
         ]);
         if(!$result['status']){
             return $result;
@@ -180,13 +181,33 @@ class CompanyController extends Controller
         
         if($userID->type=='company'){
             
-            $companyID = Company::select('company_id')->where('companies.user_id','=',$userID->user_id)->get();
-            $id = $companyID->map->only(['company_id'])->first()["company_id"];
+            $companyID = Company::select('company_id')->where('companies.user_id','=',$userID->user_id)->get()->first();
+            $companyID = $companyID->company_id;
+            //$id = $companyID->map->only(['company_id'])->first()["company_id"];
             
-            return is_numeric($id)?$id: $generalTrait->returnError('404',"error happened while getting the company");
+            return is_numeric($companyID)?$companyID: $generalTrait->returnError('404',"error happened while getting the company");
         }
         else{
             return $userID->type;
+        }
+    }
+    public static function checkAndGetCompanyID (Request $request){
+        $generalTrait = new GeneralTrait();
+        
+        $user = UserAuthController::getUser($request);
+        try{
+            $id = $user["user"]->user_id;
+            //dd($id); //5
+            $id = CompanyController::getCompanyId($id);
+            // if the value is not numeric then the type is not company
+            ///dd($id); //4
+            if(!is_numeric($id)){
+                return $generalTrait->returnError('403',"the account is not a company account");
+            }else{
+                return $id;
+            }
+        }catch(ErrorException $e){
+           return $generalTrait->returnError('404',"not logged in");
         }
     }
     

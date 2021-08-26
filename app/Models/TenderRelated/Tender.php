@@ -10,7 +10,7 @@ class Tender extends Model
     use HasFactory;
     protected $table = 'tenders';
     protected $primaryKey = 'tender_id';
-    protected $fillable = ['title','description','active','type','selective','category'];
+    protected $fillable = ['company_id','title','description','active','type','selective','category'];
     public $timestamps = false;
 
     protected $attributes = [
@@ -22,13 +22,10 @@ class Tender extends Model
         return $this->hasOne(TenderResult::class,'tender_id');
     }
 
-    public function TenderResult(){
-        return $this->hasOne(TenderResult::class,'tender_id');
-    }
 
     public function scopeIndex($query)
     {
-        return $query->select('tenders.tender_id', 'end_date', 'Title', 'company_name', 'image','image_path')
+        return $query->select('tenders.tender_id', 'end_date', 'title', 'company_name', 'image','image_path')
         ->join('tender_track', 'tender_track.tender_id', '=', 'tenders.tender_id')
         ->join('companies', 'tenders.company_id', '=', 'companies.company_id');
 

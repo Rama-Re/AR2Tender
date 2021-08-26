@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\TenderRelatedControllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Account\Company;
+use App\Models\LocationWithConnect\Location;
 use App\Models\TenderRelated\SelectiveCompany;
 use App\Models\TenderRelated\SelectiveCountry;
 use App\Models\TenderRelated\SelectiveSpecialty;
+use App\Models\TenderRelated\Tender;
 use Illuminate\Http\Request;
 
 class SelectiveTenderController extends Controller
@@ -39,6 +42,37 @@ class SelectiveTenderController extends Controller
                 ]);
             }
         }
+
+    }
+    public static function checkAbility($company_id,$tender_id){
+
+        $tenderType = Tender::find($tender_id)->value('type');
+        if($tenderType == 'open'){
+            return true;
+        }else {
+            $tender_selective = Tender::find($tender_id)->value('selective');
+            if($tender_selective == 'companies'){
+                if(SelectiveCompany::where('company_id',$company_id)->where('tender_id',$tender_id)->exists()){
+                    return true;
+                }
+            }else if ($tender_selective == 'specialty') {
+              $companySpecialty = Company::find($company_id)->value('specialty');
+              if($companySpecialty == SelectiveSpecialty::where('tender_id',$tender_id)->value('specialty')){
+                  return true;
+              }
+            }else if ($tender_selective == 'countries') {
+               $companyCountriesID = Location::join('company_locations','company_locations.location_id','=','locations.location_id')
+               ->where('company_id',$company_id)->pluck('country_id');
+               $requiredCountriesID = SelectiveCountry::where('tender_id',$tender_id)->pluck('country_id');
+               $result = $companyCountriesID->intersect($requiredCountriesID);
+               if($result->isNotEmpty()){
+                   return true;
+               }
+            }
+        }
+        return false;
+    }
+    public static function update(Request $request,$tender_id){
 
     }
 }

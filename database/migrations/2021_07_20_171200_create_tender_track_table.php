@@ -20,11 +20,8 @@ class CreateTenderTrackTable extends Migration
             $table->foreign('tender_id')->references('tender_id')->on('tenders')->onDelete('cascade');
             $table->timestampTz('start_date', $precision = 0)->useCurrent();//Set TIMESTAMP columns to use CURRENT_TIMESTAMP as default value.
             $table->timestampTz('end_date', $precision = 0)->useCurrent()->addMonth();
-            $table->timestampTz('judging_offers_date', $precision = 0)->useCurrent()->addMonths(2);
-            $table->timestampTz('judging_offers_by_administrator_date', $precision = 0)->useCurrent()->addDays(63);
-            $table->timestampTz('decision_committee_judgment_date', $precision = 0)->useCurrent()->addMonths(3);
-            $table->timestampTz('administrator_decision_committee_judgment_date', $precision = 0)->useCurrent()->addDays(93);
-            $table->timestampTz('announcing_result_date', $precision = 0)->useCurrent()->addDays(94);
+            $table->timestampTz('judging_offers_date_end', $precision = 0)->useCurrent()->addMonths(2);
+            $table->timestampTz('decision_committee_judgment_date_end', $precision = 0)->useCurrent()->addMonths(3);
 
             $table->timestamps();
         });

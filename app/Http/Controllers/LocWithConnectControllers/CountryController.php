@@ -266,7 +266,7 @@ class CountryController extends Controller
     }
     public static function getAllAsJSON(){
         $generalTrait = new GeneralTrait;
-        return $generalTrait->returnData("countries",self::$countryArray);
+        return $generalTrait->returnData("countries",Country::all());
     }
     public static function get_countries_names(){
         return array_column(self::$countryArray, 'name');

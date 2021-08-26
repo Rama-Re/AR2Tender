@@ -12,6 +12,8 @@ use App\Http\Controllers\NotificationController;
 use App\Models\Account\Company;
 use App\Models\TenderRelated\SelectiveCompany;
 use App\Models\TenderRelated\Tender;
+use App\Models\TenderRelated\Tender_file;
+use App\Models\TenderRelated\Tender_track;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -330,23 +332,31 @@ class TenderController extends Controller
         try {
             if ($request->type == 'selective') {
                 $tender->selective = $request->selective;
-                $tender->save();
-                SelectiveTenderController::store($request, $tender->tender_id);
+                if(SelectiveTenderController::validation($request)['status']){
+                    $tender->save();
+                    SelectiveTenderController::store($request, $tender->tender_id);
+                }
             }
         } catch (Exception $e) {
-            // delete the selective on ($request->selective) and the tender if found
             SelectiveTenderController::destroy($tender->tender_id);
+            Tender::findOrFail($tender->tender_id)->delete();
             return $generalTrait->returnError('401', "couldn't save the selective " . $request->selective);
         }
         try {
-            $trackRes = TenderTrackController::store($request, $tender->tender_id);
+            if(TenderTrackController::validation($request)['status']){
+                $trackRes = TenderTrackController::store($request, $tender->tender_id);
+            }
         } catch (Exception $e) {
             // delete the selective on ($request->selective) and the tender and the tender track if found
+            SelectiveTenderController::destroy($tender->tender_id);
+            Tender::findOrFail($tender->tender_id)->delete();
             return $generalTrait->returnError('401', "couldn't save the track of the tender... check if you entered dates");
         }
         if ($trackRes === true) {
             return $generalTrait->returnData('tender_id', $tender->tender_id, "the tender stored successfully");
         } else {
+            SelectiveTenderController::destroy($tender->tender_id);
+            Tender::findOrFail($tender->tender_id)->delete();
             return $trackRes;
         }
 
@@ -451,5 +461,6 @@ class TenderController extends Controller
         }
 
     }
+
 
 }

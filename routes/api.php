@@ -116,5 +116,7 @@ Route::post("getUser",[UserAuthController::class,'getUser']);
 Route::get("index/{directory}",[FileController::class,'oneindex']);
 
 Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
-Route::get("getCountries",[CountryController::class,'getAllAsJSON']);
+
+Route::get("getLocations",[LocationController::class,'index']);
+Route::get("getCountries",[CountryController::class,'index']);
 

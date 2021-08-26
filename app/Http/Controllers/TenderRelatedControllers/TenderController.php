@@ -6,14 +6,12 @@ use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\UserAuthController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
-use App\Http\Controllers\TenderRelatedControllers\TenderTrackController;
 use App\Http\Controllers\MyValidator;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TenderRelatedControllers\TenderTrackController;
 use App\Models\Account\Company;
 use App\Models\TenderRelated\SelectiveCompany;
 use App\Models\TenderRelated\Tender;
-use App\Models\TenderRelated\Tender_file;
-use App\Models\TenderRelated\Tender_track;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -47,7 +45,7 @@ class TenderController extends Controller
     {
         //checked
         $generalTrait = new GeneralTrait();
-        
+
         $search = $request->search;
 
         $tendersfromDB = Tender::index()
@@ -249,43 +247,46 @@ class TenderController extends Controller
         if (!$tender) {
             return $generalTrait->returnError('401', 'this company is not found');
         }
-        if($tender->company_id == $result  && $tender->selective == 'companies'){
-            $fcm_tokens =  SelectiveCompany::select('fcm_tokens.fcm_token')
-            ->join('companies','companies.company_id','=','selective_companies.company_id')
-            ->join('users', 'users.user_id', '=', 'companies.user_id')
-            ->join('fcm_tokens','fcm_tokens.user_id','=','users.user_id')
-            ->where('tender_id','=',$tender_id)->get();
-            return $generalTrait->returnData('fcm_tokens',$fcm_tokens);
-         }else{
-            return $generalTrait->returnError('401','the tender does not belong to this company or the tender is not company selective');
-         }
+        if ($tender->company_id == $result && $tender->selective == 'companies') {
+            $fcm_tokens = SelectiveCompany::select('fcm_tokens.fcm_token')
+                ->join('companies', 'companies.company_id', '=', 'selective_companies.company_id')
+                ->join('users', 'users.user_id', '=', 'companies.user_id')
+                ->join('fcm_tokens', 'fcm_tokens.user_id', '=', 'users.user_id')
+                ->where('tender_id', '=', $tender_id)->get();
+            return $generalTrait->returnData('fcm_tokens', $fcm_tokens);
+        } else {
+            return $generalTrait->returnError('401', 'the tender does not belong to this company or the tender is not company selective');
+        }
 
     }
     public function notifyInvitedUsers(Request $request)
     {
         $user_id = UserAuthController::getUser($request)['user']->user_id;
 
-        $result = MyValidator::validation($request->only('tender_id'),['tender_id'=>'required']);
-        if($result['status']){
+        $result = MyValidator::validation($request->only('tender_id'), ['tender_id' => 'required']);
+        if ($result['status']) {
             $receivers = $this->emailsFromTender($request);
-            if($receivers['status']){
-                $company_name = Company::join('tenders','tenders.company_id','=','companies.company_id')
-                ->where('tenders.tender_id',$request->tender_id)
-                ->get('companies.company_name')->first()->company_name;
-                $tender_name = Tender::where('tender_id',$request->tender_id)->get('tender_name')->first()->tender_name;
+            if ($receivers['status']) {
+                $company_name = Company::join('tenders', 'tenders.company_id', '=', 'companies.company_id')
+                    ->where('tenders.tender_id', $request->tender_id)
+                    ->get('companies.company_name')->first()->company_name;
+                $tender_name = Tender::where('tender_id', $request->tender_id)->get('tender_name')->first()->tender_name;
                 $receivers = $receivers['fcm_tokens'];
 
-                $data = NotificationController::getNoti($company_name,'invited you to tender: '.$tender_name,$user_id);
-                if(!$data['status']){
-                    return response()->json(GeneralTrait::returnError('404','couldn\'t generate notifications'));
+                $data = NotificationController::getNoti($company_name, 'invited you to tender: ' . $tender_name, $user_id);
+                if (!$data['status']) {
+                    return response()->json(GeneralTrait::returnError('404', 'couldn\'t generate notifications'));
                 }
-                return response()->json(GeneralTrait::returnData('notify',compact($receivers,$data)));
+                return response()->json(GeneralTrait::returnData('notify', compact($receivers, $data)));
+            } else {
+                response()->json($receivers);
             }
-            else response()->json($receivers);
+
         }
         return response()->json($result);
     }
-    public function tendersInvitedTo(Request $request){
+    public function tendersInvitedTo(Request $request)
+    {
         $generalTrait = new GeneralTrait;
         $result = $this->checkAndGetCompanyID($request);
         if (!is_numeric($result)) {
@@ -300,14 +301,16 @@ class TenderController extends Controller
     }
     public function store(Request $request)
     {
-        $res = MyValidator::validation($request->only('title','description',
-        'active','type','category','selective'),[
+        $res = MyValidator::validation($request->only('title', 'description',
+            'active', 'type', 'category', 'selective'), [
             'title' => 'required',
-            'active' => 'required',
-            'category' => 'required',
+            'active' => 'required|boolean',
+            'category' => 'required|in:medical,engineering-related,Raw materials,technical,technology-related,Other',
+            'type' => 'required|in:open,selective',
 
         ]);
-        if(!$res['status']){
+
+        if (!$res['status']) {
             return $res;
         }
         $generalTrait = new GeneralTrait;
@@ -318,6 +321,7 @@ class TenderController extends Controller
             return $result;
         }
         try {
+
             $tender = new Tender;
             $tender->company_id = $result;
             $tender->title = $request->title;
@@ -325,27 +329,34 @@ class TenderController extends Controller
             $tender->active = $request->active;
             $tender->type = $request->type;
             $tender->category = $request->category;
-            
+
         } catch (Exception $e) {
             return $generalTrait->returnError('401', $e->getMessage());
         }
         try {
             if ($request->type == 'selective') {
                 $tender->selective = $request->selective;
-                if(SelectiveTenderController::validation($request)['status']){
+                if (SelectiveTenderController::validation($request)['status']) {
                     $tender->save();
                     SelectiveTenderController::store($request, $tender->tender_id);
                 }
+            } elseif ($request->type == 'open') {
+                $tender->save();
             }
+
         } catch (Exception $e) {
-            SelectiveTenderController::destroy($tender->tender_id);
-            Tender::findOrFail($tender->tender_id)->delete();
+            if ($tender->tender_id != null) {
+                SelectiveTenderController::destroy($tender->tender_id);
+                Tender::findOrFail($tender->tender_id)->delete();
+            }
             return $generalTrait->returnError('401', "couldn't save the selective " . $request->selective);
         }
         try {
-            if(TenderTrackController::validation($request)['status']){
-                $trackRes = TenderTrackController::store($request, $tender->tender_id);
-            }
+            if (TenderTrackController::validation($request)['status']) {
+                if ($tender->tender_id != null) {
+                    $trackRes = TenderTrackController::store($request, $tender->tender_id);
+                }}
+
         } catch (Exception $e) {
             // delete the selective on ($request->selective) and the tender and the tender track if found
             SelectiveTenderController::destroy($tender->tender_id);
@@ -367,7 +378,7 @@ class TenderController extends Controller
         //validate if there is tender_id
         $generalTrait = new GeneralTrait;
         try {
-            $tender = Tender::index()->addSelect('tenders.company_id','start_date', 'description', 'type', 'selective', 'category')->where('tenders.active', '=', true)->findOrFail($request->tender_id);
+            $tender = Tender::index()->addSelect('tenders.company_id', 'start_date', 'description', 'type', 'selective', 'category')->where('tenders.active', '=', true)->findOrFail($request->tender_id);
         } catch (Exception $e) {
             return $generalTrait->returnError('404', 'the tender you are trying to reach is not existed');
         }
@@ -427,7 +438,7 @@ class TenderController extends Controller
             return $generalTrait->returnError('401', $e->__toString());
             //return $generalTrait->returnError('401',"couldn't save the tender");
         }
-        // if request type selective delete all selective and create new 
+        // if request type selective delete all selective and create new
         // if request type is open then delete all selective on
         try {
             if ($request->type == 'selective') {
@@ -447,13 +458,13 @@ class TenderController extends Controller
         if ($trackRes === true) {
 
             //if front decided to accept edit on active tenders and send notification to those who submit
-           /* 
+            /*
             if ($tender->active) {
-                $data = ['tender' => $tender->tender_id,
-                         'notify' => SubmitFormController::getCompaniesfCMToken($tender->tender_id)];
-                return $generalTrait->returnData('data', $data, "the tender updated successfully");
+            $data = ['tender' => $tender->tender_id,
+            'notify' => SubmitFormController::getCompaniesfCMToken($tender->tender_id)];
+            return $generalTrait->returnData('data', $data, "the tender updated successfully");
             } else
-            */
+             */
 
             return $generalTrait->returnData('tender', $tender->tender_id, "the tender updated successfully");
         } else {
@@ -461,6 +472,5 @@ class TenderController extends Controller
         }
 
     }
-
 
 }

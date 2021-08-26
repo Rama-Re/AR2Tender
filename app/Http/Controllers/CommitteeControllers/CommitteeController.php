@@ -18,7 +18,10 @@ class CommitteeController extends Controller
         $data = $request->only('tender_id','type');
         $rules = [
             'tender_id' => 'required',
-            'type' => 'required|in:financial,technician,decision maker'
+            'type' => 'required|in:financial,technician,decision maker',
+            'members' => 'required|array',
+            'members.*.task'=> 'required',
+            'members.*.employee_id'=> 'required',
         ];
         return MyValidator::validation($data,$rules);
     }
@@ -30,7 +33,12 @@ class CommitteeController extends Controller
             $committee->type = $request->type;
             $committee->save();
             if(!$committee){
-                return response()->json(GeneralTrait::returnError('403','Some thing went wrong'));
+                return response()->json(GeneralTrait::returnError('403','wrong in add committee try again later'));
+            }
+            $addMembers = (new CommitteeMemberController)->addMembers($committee->committee_id,$request->members);
+            if(!$addMembers){
+                $committee->delete();
+                return response()->json(GeneralTrait::returnError('403','wrong in add committee members'));
             }
             //Company created, return success response
             return response()->json(GeneralTrait::returnData('committee',$committee,'Committee created successfully'));

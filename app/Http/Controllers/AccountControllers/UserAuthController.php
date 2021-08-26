@@ -56,7 +56,7 @@ class UserAuthController extends Controller
     public function login(Request $request)
     {
         $result = MyValidator::validation($request->only('email', 'password'), [
-            'email' => 'required|email',
+            'email' => 'required|email|exists:users,email',
             'password' => 'required',
         ]);
         $generalTrait = new GeneralTrait;

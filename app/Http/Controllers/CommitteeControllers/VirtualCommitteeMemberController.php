@@ -47,7 +47,7 @@ class VirtualCommitteeMemberController extends Controller
     }
     public static function index(Request $request)
     {
-        $virtualCommitteeMembers = VirtualCommitteeMember::where('virtual_committee_id',$request->virtual_committee_id)->get()->first();
+        $virtualCommitteeMembers = VirtualCommitteeMember::where('virtual_committee_id',$request->virtual_committee_id)->get();
         return $virtualCommitteeMembers;
     }
 }

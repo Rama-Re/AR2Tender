@@ -33,10 +33,13 @@ class VerificationUser
         }
         else if($request->has('email')){
             $user = User::where('email',$request->email)->get()->first();
-            if($user->is_verified){
-                return $next($request);
+            if($user){
+                if($user->is_verified){
+                    return $next($request);
+                }
+                return response()->json(GeneralTrait::returnError('403','Your account isn\'t verified'));
             }
-            return response()->json(GeneralTrait::returnError('403','Your account isn\'t verified'));
+            return response()->json(GeneralTrait::returnError('403','your email isn\'t exist'));
         }
         return response()->json(GeneralTrait::returnError('404','email is required'));
     }

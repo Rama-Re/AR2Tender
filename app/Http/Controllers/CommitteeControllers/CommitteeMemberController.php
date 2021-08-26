@@ -41,6 +41,19 @@ class CommitteeMemberController extends Controller
         }
         else return response()->json($result);
     }
+    public function addMembers($committee_id, $members)
+    {
+        $status = true;
+        foreach($members as $member){
+            $committeeMember = new CommitteeMember;
+            $committeeMember->committee_id = $committee_id;
+            $committeeMember->employee_id = $member['employee_id'];
+            $committeeMember->task = $member['task'];
+            $committeeMember->save();
+            if(!$committeeMember) $status = false;
+        }
+        return $status;
+    }
     public function addVirtualCommitteeMembers($committee_id, $members)
     {
         foreach($members as $member){
@@ -49,7 +62,6 @@ class CommitteeMemberController extends Controller
             $committeeMember->employee_id = $member->employee_id;
             $committeeMember->task = $member->task;
             $committeeMember->save();
-            if(!$committeeMember) return false;
         }
         return true;
     }

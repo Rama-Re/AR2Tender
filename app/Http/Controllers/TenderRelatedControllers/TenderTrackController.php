@@ -4,6 +4,7 @@ namespace App\Http\Controllers\TenderRelatedControllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
 use App\Models\TenderRelated\Tender_track;
 use Carbon\Carbon;
 use Exception;
@@ -15,8 +16,16 @@ class TenderTrackController extends Controller
 {
     public static function store(Request $request,$tenderID)
     {
-        //$date = $dateFilterSpecific?new Carbon($request->start_date,'UTC'):new Carbon(now('UTC'));
-            
+        $res = MyValidator::validation($request->only('start_date','end_date',
+        'judging_offers_date_end','decision_committee_judgment_date_end'),[
+            'start_date'=>'date|required',
+            'end_date'=>'date|required',
+            'judging_offers_date_end'=>'date|required',
+            'decision_committee_judgment_date_end'=>'date|required',
+        ]);
+        if(!$res['status']){
+            return $res;
+        }
         // change the dates and check dates
         $generalTrait = new GeneralTrait;
             $date = new Carbon(now('UTC'));
@@ -78,7 +87,15 @@ class TenderTrackController extends Controller
         }
         
     }
+    public static function destroy(Request $request,$tender_id){
+
+        Tender_track::where('tender_id', $tender_id)->delete();
+
+    }
     public static function update(Request $request,$tender_id){
 
+        self::destroy($request,$tender_id);
+        self::store($request,$tender_id);
+        
     }
 }

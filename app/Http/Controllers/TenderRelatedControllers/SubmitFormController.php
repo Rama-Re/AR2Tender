@@ -73,7 +73,9 @@ class SubmitFormController extends Controller
     {
         //$generalTrait = new GeneralTrait;
         $companiesEmails = Submit_form::join('companies','companies.company_id','=','submit_forms.company_id')
-        ->join('users','users.user_id','=','companies.user_id')->where('tender_id', $tender_id)->pluck('email');
+        ->join('users','users.user_id','=','companies.user_id')
+        ->join('fcm_tokens','fcm_tokens.user_id','=','users.user_id')
+        ->where('tender_id', $tender_id)->pluck('fcm_tokens.fcm_token');
         //return $generalTrait->returnData('companiesEmails', $companiesEmails);
         return $companiesEmails;
 

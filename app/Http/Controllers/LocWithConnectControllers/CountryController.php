@@ -264,9 +264,10 @@ class CountryController extends Controller
     public static function get_all(){
         return self::$countryArray; 
     }
-    public static function getAllAsJSON(){
+    public static function getAllAsJSON(Request $request){
+        $countries = $request->countries;
         $generalTrait = new GeneralTrait;
-        return $generalTrait->returnData("countries",Country::all());
+        return $generalTrait->returnData("countries",Country::whereIn('country_id', $countries)->get);
     }
     public static function get_countries_names(){
         return array_column(self::$countryArray, 'name');
@@ -294,7 +295,7 @@ class CountryController extends Controller
                 ];
                 DB::table('countries')->insert($countriesarray);
             }
-            return $generalTrait->returnSuccessMessage('countries added succesfully');
+            return $generalTrait->returnSuccessMessage('countries added successfully');
         } else {
             return $generalTrait->returnData('countries',DB::table('countries')->get(),'countries already added');
         }

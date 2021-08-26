@@ -7,6 +7,7 @@ use App\Http\Controllers\GeneralTrait;
 use App\Models\TenderRelated\Tender_file;
 use Illuminate\Http\Request;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
+use PhpParser\Builder\Function_;
 
 use function PHPUnit\Framework\returnSelf;
 
@@ -35,6 +36,16 @@ class TenderFileController extends Controller
         $tenderFiles = FileController::decryptCollection($tenderFiles);
         return $generalTrait->returnData('tenderFiles',$tenderFiles);
         
+    }
+    public function destroy(Request $request)
+    {
+       // request has file_id
+       $generalTrait =  new GeneralTrait;
+       $res = FileController::destroy($request->file_id,'tender');
+       if($res === true){
+        return $generalTrait->returnSuccessMessage("file deleted successfully");
+    }
+    else return $res;
     }
 
 }

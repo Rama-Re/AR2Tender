@@ -3,6 +3,7 @@
 namespace App\Models;
 use App\Models\Account\Employee;
 use App\Models\Account\Company;
+use App\Models\Account\FCMToken;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -28,7 +29,6 @@ class User extends Authenticatable implements JWTSubject ,MustVerifyEmail
     protected $hidden = [
         'password',
         'confirm_code',
-        'remember_token',
     ];
 
     protected $casts = [
@@ -65,6 +65,9 @@ class User extends Authenticatable implements JWTSubject ,MustVerifyEmail
         return $this->hasOne(Employee::class);
     }
     public function Admin(){
-        return $this->hasOne(Employee::class);
+        return $this->hasOne(Admin::class);
+    }
+    public function FCMToken(){
+        return $this->Many(FCMToken::class);
     }
 }

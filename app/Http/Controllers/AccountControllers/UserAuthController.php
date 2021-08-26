@@ -61,8 +61,9 @@ class UserAuthController extends Controller
         $generalTrait = new GeneralTrait;
         if($result['status']){
             try{
+                $exist_email = User::where('email',$request->email)->count();
+                if($exist_email == 0) return $generalTrait->returnError('404', 'email not exist');
                 $credentials = $request->only(['email', 'password', 'type']);
-                //check                
                 $token = JWTAuth::attempt($credentials);
                 if (!$token) {
                     return $generalTrait->returnError('E001', 'Email or Password is wrong');
@@ -73,19 +74,26 @@ class UserAuthController extends Controller
                 return $generalTrait->returnError($e->getCode(), $e->getMessage());
             }
         }
+        return response()->json($result);
     }
 
     public static function getUser(Request $request)
     {
-        $generalTrait = new GeneralTrait;
+        try{
+            $generalTrait = new GeneralTrait;
         $token = $request->header('token');
         $request->headers->set('token',(string)$token,true);
         $request->headers->set('Authorization','Bearer '.$token,true);
         $user = JWTAuth::parseToken()->authenticate($request);
-
         if($user)
             return $generalTrait->returnData('user',$user);
         else return $generalTrait->returnError('401','Something went wrong');
+
+        }catch(Exception $e){
+            return $generalTrait->returnError('401',$e->getMessage());
+        }
+        
+        
     }
 
     public function logout(Request $request)
@@ -113,13 +121,15 @@ class UserAuthController extends Controller
     {
         $generalTrait = new GeneralTrait;
         try{
+            $exist_email = User::where('email',$request->email)->count();
+            if($exist_email == 0) return $generalTrait->returnError('404', 'email not exist');
             $confirmCode = random_int(100000,999999);
             $details = ['title'=> 'Use this code to confirm your Account','body'=> $confirmCode];
             Mail::to($request->email)->send(new \App\Mail\SampleMail($details));
             $user = User::where('email',$request->email)->get()->first();
             $user->confirm_code = $confirmCode;
             $user->save();
-            return $generalTrait->returnSuccessMessage('Code send successfully');
+            return $generalTrait->returnSuccessMessage('Code sent to your email, check it!');
         }catch(Exception $exception){
             return $generalTrait->returnError($exception->getCode(), $exception->getMessage());
         }
@@ -129,6 +139,10 @@ class UserAuthController extends Controller
     {
         $generalTrait = new GeneralTrait;
         try{
+            $validator = Validator::make($request->only('email'), [
+                'email' => 'required|email',
+            ]);
+            if(!$validator['status']) return response()->json($validator);
             $confirmCode = random_int(100000,999999);
             $details = ['title'=> 'Use this code to reset your Password','body'=> $confirmCode];
             Mail::to($request->email)->send(new \App\Mail\SampleMail($details));
@@ -198,4 +212,5 @@ class UserAuthController extends Controller
         $user->save();
         return response()->json(GeneralTrait::returnSuccessMessage('email activated successfully'));
     }
+    
 }

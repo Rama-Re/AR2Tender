@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SelectiveSpecialty extends Model
 {
+    protected $fillable = ['company_id','tender_id'];
+    public $timestamps = false;
+    public $incrementing = false;
     use HasFactory;
 }

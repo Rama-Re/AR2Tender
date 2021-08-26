@@ -5,6 +5,7 @@ use App\Http\Controllers\AccountControllers\UserAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\EmployeeController;
+use App\Http\Controllers\AccountControllers\FCMTokenController;
 use App\Http\Controllers\AccountControllers\UserController;
 use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
@@ -38,13 +39,18 @@ Route::group(['middleware' => ['verifyUser','active_user']], function () {
     Route::post("user/login", [UserAuthController::class,'login']);
     Route::post("user/logout", [UserAuthController::class,'logout']);
 });
+Route::get("company/getProfile",[CompanyController::class,'getProfile']);
 
 Route::post("admin/register", [AdminController::class,'register']);
 
 Route::group(['middleware' => ['checkToken','active_user','verifyUser']], function () {
+    
+    Route::post("fcm/saveFCMToken", [FCMTokenController::class,'saveFCMToken']);
+
     ///***///
     //Admin Group
     ///***///
+    
     Route::group(['middleware' => ['checkType:admin']], function () {
         Route::post("saveCountries", [CountryController::class,'save']);
         Route::post("saveCities", [LocationController::class,'save']);
@@ -58,7 +64,7 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
     ///***///
     Route::group(['middleware' => ['checkType:company']], function () {
         Route::post("employee/register", [EmployeeController::class,'register']);
-        Route::get("company/getProfile",[CompanyController::class,'getProfile']);
+        //Route::get("company/getProfile",[CompanyController::class,'getProfile']);
         Route::get("company/changeStatus",[CompanyController::class,'changeStatus']);
         Route::delete("employee/destroyUser",[EmployeeController::class,'destroyUser']);
         Route::post("employee/sentEmailToRegister",[EmployeeController::class,'sentEmailToRegister']);
@@ -105,4 +111,5 @@ Route::post("getUser",[UserAuthController::class,'getUser']);
 Route::get("index/{directory}",[FileController::class,'oneindex']);
 
 Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
+Route::get("getCountries",[CountryController::class,'getAllAsJSON']);
 

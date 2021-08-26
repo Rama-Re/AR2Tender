@@ -61,7 +61,7 @@ class CommitteeController extends Controller
                     }
                     $members = new CommitteeMemberController;
                     $result = $members->addVirtualCommitteeMembers($committee->committee_id,$virtualCommitteeMembers);
-                    if($result) return response()->json(GeneralTrait::returnSuccessMessage("virtual committee added succesfully"));
+                    if($result) return response()->json(GeneralTrait::returnSuccessMessage("virtual committee added successfully"));
                     return response()->json(GeneralTrait::returnError('401','members of VirtualCommittee can\'t be added'));
                 }
                 return response()->json(GeneralTrait::returnError('404','this VirtualCommittee doesn\'t have any members'));

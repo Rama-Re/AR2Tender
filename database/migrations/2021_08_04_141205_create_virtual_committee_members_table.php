@@ -20,7 +20,7 @@ class CreateVirtualCommitteeMembersTable extends Migration
             $table->foreign('virtual_committee_id')->references('virtual_committee_id')->on('virtual_committees')->onDelete('cascade');
             $table->foreign('employee_id')->references('employee_id')->on('employees')->onDelete('cascade');
             //$table->primary(['virtual_committee_id','employee_id'],'virtual_committee_member_id')->unique();
-            $table->enum('task',['administrator','viewer','discussant']);
+            $table->enum('task',['administrator','member']);
             $table->timestamps();
         });
     }

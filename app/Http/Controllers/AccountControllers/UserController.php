@@ -14,10 +14,5 @@ use App\Models\Account\Employee;
 
 class UserController extends Controller
 {
-    protected static function getTypeOfUserByEmail(Request $request){
-        $user = User::where('email',$request->email)->get();
-    }
-    protected static function getTypeOfUserById(Request $request){
-        $user = User::find($request->user_id);
-    }
+    
 }

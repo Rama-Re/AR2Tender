@@ -90,10 +90,12 @@ class EmployeeController extends Controller
         if($response["status"]){
             $result = UserAuthController::getUser($request);
             if($result["status"]){
-                $company_name = Company::where('user_id',$result["user"]->user_i)->get('company_name')->first();
+                $company_name = Company::where('user_id',$result["user"]->user_id)->get('company_name')->first();
+                $employee = Employee::join('users','users.user_id','=','employees.user_id')->where('employee_id',$request->employee_id)->get(['email','password'])->first();
+                if(!$employee) return response()->json(GeneralTrait::returnError('404', 'this employee is not found'));
                 $details = [
                     'title'=> $company_name.'\nYou have to sign in at AR2Tender Application with this account',
-                    'body'=> 'email: '.$request->email.'\npassword: '.$request->password
+                    'body'=> 'email: '.$employee->email.'\npassword: '.$request->password
                 ];
                 Mail::to($request->email)->send(new \App\Mail\SampleMail($details));
                 return response()->json(GeneralTrait::returnSuccessMessage('email send successfully'));
@@ -108,7 +110,7 @@ class EmployeeController extends Controller
         $user = User::where('email',$request->email)->get()->first();
         if($user) {
             $user->delete();
-            return response()->json(GeneralTrait::returnSuccessMessage('Account deleted succesfully'));
+            return response()->json(GeneralTrait::returnSuccessMessage('Account deleted successfully'));
         }
         return response()->json(GeneralTrait::returnError('404', 'Not Found'));
     }

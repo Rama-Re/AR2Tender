@@ -14,18 +14,18 @@ use function PHPUnit\Framework\returnSelf;
 
 class TenderTrackController extends Controller
 {
+    public static function validation(Request $request)
+    {
+        return MyValidator::validation($request->only('start_date','end_date',
+            'judging_offers_date_end','decision_committee_judgment_date_end'),[
+            'start_date'=>'date|nullable',
+            'end_date'=>'date|nullable',
+            'judging_offers_date_end'=>'date|nullable',
+            'decision_committee_judgment_date_end'=>'date|nullable',
+        ]);
+    }
     public static function store(Request $request,$tenderID)
     {
-        $res = MyValidator::validation($request->only('start_date','end_date',
-        'judging_offers_date_end','decision_committee_judgment_date_end'),[
-            'start_date'=>'date|required',
-            'end_date'=>'date|required',
-            'judging_offers_date_end'=>'date|required',
-            'decision_committee_judgment_date_end'=>'date|required',
-        ]);
-        if(!$res['status']){
-            return $res;
-        }
         // change the dates and check dates
         $generalTrait = new GeneralTrait;
             $date = new Carbon(now('UTC'));
@@ -96,6 +96,33 @@ class TenderTrackController extends Controller
 
         self::destroy($request,$tender_id);
         self::store($request,$tender_id);
-        
     }
+    public function checkJudgingOffersDate ($tender_id){
+       try{
+          $endTender= Tender_track::where('tender_id', $tender_id)->value('end_date'); 
+           if($endTender >= new Carbon(now('UTC'))){
+               return false;
+           }
+           else {
+               return true;
+           }
+       } catch(Exception $e){
+           return false;
+       }
+
+    }
+    public function checkDecisionCommitteeJudgmentDate ($tender_id){
+        try{
+            $judgingEndDate= Tender_track::where('tender_id', $tender_id)->value('end_date'); 
+             if($judgingEndDate >= new Carbon(now('UTC'))){
+                 return false;
+             }
+             else {
+                 return true;
+             }
+         } catch(Exception $e){
+             return false;
+         }
+    }
+
 }

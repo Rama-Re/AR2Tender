@@ -16,16 +16,18 @@ use PhpParser\Node\Stmt\Catch_;
 
 class SelectiveTenderController extends Controller
 {
-    public static function store(Request $request, $tender_id)
+    public static function validation(Request $request)
     {
-        //'companies','specialty','countries'
-        $res = MyValidator::validation($request->only('selective','selective_on'),[
+        return MyValidator::validation($request->only('selective','selective_on'),[
             'selective' => 'required',
             'selective_on' => 'required',
         ]);
-        if(!$res['status']){
-            return $res;
-        }
+    }
+    public static function store(Request $request, $tender_id)
+    {
+        //'companies','specialty','countries'
+        
+        
         $selective = $request->selective;
         if ($selective == 'companies') {
             //  the front will give me the companyId now how ? ... they will call getAll function from CompanyController

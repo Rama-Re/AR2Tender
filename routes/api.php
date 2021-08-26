@@ -14,6 +14,8 @@ use App\Http\Controllers\TenderRelatedControllers\FileController;
 use App\Http\Controllers\TenderRelatedControllers\SupplierFileController;
 use App\Http\Controllers\TenderRelatedControllers\TenderController;
 use App\Http\Controllers\TenderRelatedControllers\TenderFileController;
+use App\Models\Account\Employee;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,6 +31,7 @@ use App\Http\Controllers\TenderRelatedControllers\TenderFileController;
 //Route::get("company/getCompanyById", [CompanyController::class,'getCompanyById']);
 Route::post("company/register", [CompanyController::class,'register']);
 Route::post("company/upload", [CompanyController::class,'uploadCompanyPhoto']);
+Route::get("company/getProfile",[CompanyController::class,'getProfile']);
 
 Route::post("user/verifyAccount", [UserAuthController::class,'verifyAccount']);
 Route::post("user/confirmCode", [UserAuthController::class,'confirmCode']);
@@ -45,11 +48,9 @@ Route::post("admin/register", [AdminController::class,'register']);
 Route::group(['middleware' => ['checkToken','active_user','verifyUser']], function () {
     
     Route::post("fcm/saveFCMToken", [FCMTokenController::class,'saveFCMToken']);
-
     ///***///
     //Admin Group
     ///***///
-    
     Route::group(['middleware' => ['checkType:admin']], function () {
         Route::post("saveCountries", [CountryController::class,'save']);
         Route::post("saveCities", [LocationController::class,'save']);
@@ -57,6 +58,8 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         Route::get("getAllCompanies",[CompanyController::class,'getall']);
         Route::get("user/bloackUser",[UserAuthController::class,'bloackUser']);
         Route::get("user/unbloackUser",[UserAuthController::class,'unbloackUser']);
+        Route::put("user/editPassword",[UserAuthController::class,'editPassword']);
+        Route::put("admin/editProfile",[AdminController::class,'editProfile']);
     });
     ///***///
     //Company Group
@@ -67,6 +70,9 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         Route::get("company/changeStatus",[CompanyController::class,'changeStatus']);
         Route::delete("employee/destroyUser",[EmployeeController::class,'destroyUser']);
         Route::post("employee/sentEmailToRegister",[EmployeeController::class,'sentEmailToRegister']);
+        Route::put("company/editProfile",[CompanyController::class,'editProfile']);
+        Route::put("employee/editProfile",[EmployeeController::class,'editProfile']);
+        Route::put("user/editPassword",[UserAuthController::class,'editPassword']);
     });
     ///***///
     //Employee Group
@@ -74,13 +80,12 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
     Route::group(['middleware' => ['checkType:employee']], function () {
         Route::get("employee/getProfile",[EmployeeController::class,'getProfile']);
     });
-
 });
 
 
 Route::group(['prefix' => 'tenders'], function () {
 
-    
+
     Route::get("filter",[TenderController::class,'filter']);
     Route::get("indexSearch",[TenderController::class,'indexSearch']);
     Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);

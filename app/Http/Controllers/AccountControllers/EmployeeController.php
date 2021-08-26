@@ -114,4 +114,16 @@ class EmployeeController extends Controller
         }
         return response()->json(GeneralTrait::returnError('404', 'Not Found'));
     }
+    public function editProfile(Request $request)
+    {
+        $user_id = UserAuthController::getUser($request)['user']->user_id;
+        $company_id = Company::where('user_id',$user_id)->get('company_id')->first()->company_id;
+        $employee = Employee::where('employee_id',$request->employee_id)->get()->first();
+        if($company_id != $employee->company_id){return response()->json(GeneralTrait::returnError('403','this is not your employee'));}
+        $employee->employee_name = $request->employee_name;
+        $employee->user_id = $user_id;
+        $employee->save();
+        if($employee) return response()->json(GeneralTrait::returnData('employee',$employee));
+        else return response()->json(GeneralTrait::returnError('404','something went wrong'));
+    }
 }

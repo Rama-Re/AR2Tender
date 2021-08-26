@@ -13,6 +13,7 @@ use App\Models\LocationWithConnect\Country;
 use App\Models\LocationWithConnect\Location;
 use App\Models\LocationWithConnect\Phone;
 use App\Models\User;
+use GrahamCampbell\ResultType\Result;
 use Illuminate\Support\Facades\Validator;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
@@ -28,8 +29,6 @@ class CompanyController extends Controller
             'company_name' => 'required|string',
             'director_name' => 'required|string',
             'username' => 'required|string',
-            'image'=> 'required|string',
-            'image_path' => 'required|string',
             'specialty' => 'required|in:medical,engineering-related,Raw-materials,technical,technology-related,Other',
             'status' => 'in:TenderOffer,TendersManager',
             'about_us' => 'required',
@@ -72,9 +71,14 @@ class CompanyController extends Controller
                 $company->specialty = $request->specialty;
                 $company->status = $request->status;
                 $company->about_us = $request->about_us;
-                $company->image = $request->image;
-                $company->image_path = $request->image_path;
-                $company->user_id = 1;
+                if($request->has('image') && $request->has('image_path')){
+                    $company->image = $request->image;
+                    $company->image_path = $request->image_path;
+                }
+                else {
+                    $company->image = null;
+                    $company->image_path = null;
+                }
                 $company->user_id = ($response["user"])->user_id;
                 $company->save();
                 if($company){
@@ -92,53 +96,62 @@ class CompanyController extends Controller
     }
     public static function getUserID(Request $request){
         $generalTrait = new GeneralTrait;
-        $user_id = Company::find($request->company_id)->get('user_id');
-        return $generalTrait ->returnData('user_id',$user_id);
+        $user_id = Company::find($request->company_id)->get('user_id')->first();
+        if(!$user_id) return $generalTrait->returnError('404','company not exist');
+        return $generalTrait ->returnData('user_id',$user_id->user_id);
     }
     public function getAll(){
         $generalTrait = new GeneralTrait;
-        $companies = Company::get();
+        $companies = Company::all();
         return response()->json($generalTrait ->returnData('companies',$companies));
     }
 
     public function getProfile(Request $request){
         $generalTrait = new GeneralTrait;
-        $response = UserAuthController::validationToken($request);
-        if($response["status"]){
-            $result = UserAuthController::getUser($request);
-            if($result["status"]){
-                $company = Company::where('user_id',$result["user"]->user_id)->get()->first();
-                $locationsID = Company::join('company_locations', 'company_locations.company_id', '=', 'companies.company_id')
-                ->where('companies.company_id',$company->company_id)
-                ->get(['company_locations.location_id','company_locations.company_location_id','company_locations.branch_count']);
-                $locations = array();
-                $count = 0;
-                foreach($locationsID as $branch){
-                    $phone_numbers = Phone::join('company_locations','company_locations.company_location_id','phones.company_location_id')
-                    ->where('company_locations.company_location_id',$branch->company_location_id)
-                    ->get('phone_number');
-                    $i=0;
-                    $phones = array();
-                    foreach($phone_numbers as $phone){
-                        $phones[$i] = $phone->phone_number;
-                        $i++;
-                    }
-                    $location = Location:: where('location_id',$branch->location_id)->get('location_name')->first()->location_name;
-                    $country_id = Location:: where('location_id',$branch->location_id)->get('country_id')->first()->country_id;
-                    $country = Country::where('country_id',$country_id)->get('country_name')->first()->country_name;
-                    $locations[$count] = compact('location','country','phones');
-                    $count++;
+        
+        $result = UserAuthController::getUser($request);
+        
+        if(!$result["status"]){
+            if($request->has('company_id')){
+                $user = Company::where('company_id',$request->company_id)->get('user_id')->first();
+                if(!$user){
+                    return response()->json($generalTrait ->returnError('404','failed request'));
                 }
-                return compact('company','locations');
-                $company = Company::where('user_id',$result["user"]->user_id)->get();
-                if (!$company) {
-                    return response()->json($generalTrait->returnError('404', 'not found'));
-                }
-                return response()->json($generalTrait->returnData('Profile',compact('company','locations'),'Success'));
+                $user_id = $user->user_id; 
             }
-            else response()->json($result);
+            else return response()->json($generalTrait ->returnError('404','failed request'));
         }
-        return response()->json($response);
+        else {
+            $user_id = $result["user"]->user_id;
+        }
+        $company = Company::where('user_id',$user_id)->get()->first();
+        if (!$company) {
+            return response()->json($generalTrait->returnError('404', 'not found'));
+        }
+        $locationsID = Company::join('company_locations', 'company_locations.company_id', '=', 'companies.company_id')
+        ->where('companies.company_id',$company->company_id)
+        ->get(['company_locations.location_id','company_locations.company_location_id','company_locations.branch_count']);
+        $locations = array();
+        $count = 0;
+        foreach($locationsID as $branch){
+            $phone_numbers = Phone::join('company_locations','company_locations.company_location_id','phones.company_location_id')
+            ->where('company_locations.company_location_id',$branch->company_location_id)
+            ->get('phone_number');
+            $i=0;
+            $phones = array();
+            foreach($phone_numbers as $phone){
+                $phones[$i] = $phone->phone_number;
+                $i++;
+            }
+            $data = Location:: where('location_id',$branch->location_id)->get(['location_name','country_id'])->first();
+            $location = $data->location_name;
+            $country_id = $data->country_id;
+            $country = Country::where('country_id',$country_id)->get('country_name')->first()->country_name;
+            $locations[$count] = compact('location','country','phones');
+            $count++;
+        }
+        return response()->json($generalTrait->returnData('Profile',compact('company','locations'),'Success'));
+       // return response()->json($result);
     }
     
     public function getCompanyById(Request $request)
@@ -152,7 +165,8 @@ class CompanyController extends Controller
         return response()->json($generalTrait->returnData('company', $company));
     }
     
-    public function changeStatus(Request $request){
+    public function changeStatus(Request $request)
+    {
         $generalTrait = new GeneralTrait;
         $user = UserAuthController::getUser($request)['user'];
         $user_id = $user['user_id'];
@@ -170,6 +184,38 @@ class CompanyController extends Controller
             return response()->json($generalTrait -> returnSuccessMessage('updated'));
         }
         return response()->json($generalTrait -> returnError('403','something went wrong'));
+    }
+    public function editProfile(Request $request)
+    {
+        $user = UserAuthController::getUser($request)['user'];
+        $company = Company::where('user_id',$user->user_id)->get()->first();
+        if(!$company) return response()->json(GeneralTrait::returnError('404','wrong request'));
+        
+        $company->company_name = $request->company_name;
+        $company->director_name = $request->director_name;
+        $company->username = $request->username;
+        $company->specialty = $request->specialty;
+        $company->status = $request->status;
+        $company->about_us = $request->about_us;
+        if($request->has('image') && $request->has('image_path')){
+            $company->image = $request->image;
+            $company->image_path = $request->image_path;
+        }
+        else {
+            $company->image = null;
+            $company->image_path = null;
+        }
+        $company->user_id = $user->user_id;
+        $company->save();
+        if($company){
+            $companyLocation = (new CompanyLocationController)->deleteCompanyLocations($company->company_id);
+            foreach($request->locations as $location){
+                $companyLocation = new CompanyLocationController;
+                $companyLocation->store($location,$company->company_id);
+            }
+        }
+        if($company) return response()->json(GeneralTrait::returnData('company',$company));
+        else return response()->json(GeneralTrait::returnError('404','something went wrong'));
     }
     public static function getCompanyId($id)
     {

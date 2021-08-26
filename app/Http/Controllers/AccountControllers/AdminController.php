@@ -67,8 +67,14 @@ class AdminController extends Controller
         
     }
 
-    public function updateProfile(Request $request)
+    public function editProfile(Request $request)
     {
-        # code...
+        $user = UserAuthController::getUser($request)['user'];
+        $admin = Admin::where('user_id',$user->user_id)->get()->first();
+        $admin->admin_name = $request->admin_name;
+        $admin->user_id = $user->user_id;
+        $admin->save();
+        if($admin) return response()->json(GeneralTrait::returnData('admin',$admin));
+        else return response()->json(GeneralTrait::returnError('404','something went wrong'));
     }
 }

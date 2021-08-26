@@ -20,7 +20,10 @@ class CheckEmployeeID
     public function handle(Request $request, Closure $next)
     {
         $generalTrait = new GeneralTrait;
-        $user = JWTAuth::parseToken()->authenticate();
+        $token = $request->header('token');
+        $request->headers->set('token',(string)$token,true);
+        $request->headers->set('Authorization','Bearer '.$token,true);
+        $user = JWTAuth::parseToken()->authenticate($request);
         $user_id = $user->user_id;
         $company_id = Employee::join('users','users.user_id','employees.user_id')->where('user_id',$user_id)->first()->get('company_id');
         if($company_id == $request->company_id){

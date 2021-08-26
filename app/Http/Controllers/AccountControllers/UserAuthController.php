@@ -18,6 +18,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use GrahamCampbell\ResultType\Result;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -148,9 +149,23 @@ class UserAuthController extends Controller
             return $generalTrait->returnError($exception->getCode(), $exception->getMessage());
         }
     }
+
+    public function editPassword(Request $request)
+    {
+        $user = $this->getUser($request)['user'];
+        if($request->has('oldPassword')){
+            if(Hash::check($user->password , $request->oldPassword) )
+            {
+                return $this->resetPassword($request);
+            }
+            else return response()->json(GeneralTrait::returnError('404', 'oldPassword is wrong'));
+        }
+        else return response()->json(GeneralTrait::returnError('404', 'oldPassword is required'));
+    }
     
     public function resetPassword(Request $request)
     {
+
         $generalTrait = new GeneralTrait;
         try {
             $validator = Validator::make($request->only('password'), [

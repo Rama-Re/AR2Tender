@@ -28,27 +28,10 @@ class CompanyLocationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function deleteCompanyLocations($company_id)
     {
-        //
+        CompanyLocation::where('company_id',$company_id)->delete();
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store($request,$company_id)
     {
         $generalTrait = new GeneralTrait;

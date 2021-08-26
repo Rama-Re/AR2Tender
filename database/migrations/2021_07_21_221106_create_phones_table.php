@@ -17,7 +17,7 @@ class CreatePhonesTable extends Migration
             $table->bigIncrements('phone_id')->unique();
             $table->string('phone_number');
             $table->unsignedBigInteger('company_location_id');
-            $table->foreign('company_location_id')->references('company_location_id')->on('company_locations');
+            $table->foreign('company_location_id')->references('company_location_id')->on('company_locations')->onDelete('cascade');
             $table->timestamps();
         });
     }

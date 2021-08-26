@@ -160,18 +160,19 @@ class UserAuthController extends Controller
     {
         $user = $this->getUser($request)['user'];
         if($request->has('oldPassword')){
-            if(Hash::check($user->password , $request->oldPassword) )
+            //return $user->password;
+            if(!Hash::check($request->oldPassword,$user->password) )
             {
-                return $this->resetPassword($request);
+                return response()->json(GeneralTrait::returnError('404', 'oldPassword is wrong'));
             }
-            else return response()->json(GeneralTrait::returnError('404', 'oldPassword is wrong'));
+            $request->request->add(['email' => $user->email]);
+            return $this->resetPassword($request);
         }
         else return response()->json(GeneralTrait::returnError('404', 'oldPassword is required'));
     }
     
     public function resetPassword(Request $request)
     {
-
         $generalTrait = new GeneralTrait;
         try {
             $validator = Validator::make($request->only('password'), [
@@ -188,8 +189,6 @@ class UserAuthController extends Controller
         if(!$user->is_verified){
             return response()->json($generalTrait->returnError('403', 'verify your account to reset YourPassword'));
         }
-        else 
-        return response()->json($generalTrait->returnError('401', 'you have to verify your email'));
         $user->password = bcrypt($request->password);
         $user->save();
         if($user)

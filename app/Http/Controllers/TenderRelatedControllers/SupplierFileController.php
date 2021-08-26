@@ -10,11 +10,14 @@ use PhpParser\Node\Stmt\Return_;
 class SupplierFileController extends Controller
 {
     //
-    public function store(Request $request)
+    public function store(Request $request,$subID)
     {
         $generaltrait = new GeneralTrait;
-        FileController::storeFiles($request,'supplier');
-        return $generaltrait->returnSuccessMessage("files stored successfully");
+        $res = FileController::storeFiles($request,'supplier');
+        if($res === true){
+            return $generaltrait->returnSuccessMessage("files uploaded successfully");
+        }
+        else return $res;
     }
     public function index(Request $request){
         $generaltrait = new GeneralTrait;
@@ -30,8 +33,17 @@ class SupplierFileController extends Controller
         }
         $filesFromDB = FileController::decryptCollection($filesFromDB);
         return $generaltrait->returnData('files',$filesFromDB);
-        
-        
+           
+    }
+    public function destroy(Request $request)
+    {
+       // request has file_id
+       $generalTrait =  new GeneralTrait;
+       $res = FileController::destroy($request->file_id,'supplier');
+       if($res === true){
+        return $generalTrait->returnSuccessMessage("file deleted successfully");
+    }
+    else return $res;
     }
 
 }

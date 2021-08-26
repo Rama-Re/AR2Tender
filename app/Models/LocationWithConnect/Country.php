@@ -14,6 +14,8 @@ class Country extends Model
         'country_name',
         'num_code'
     ];
+    public $incrementing = false;
+    protected $keyType = 'char';
 
     protected $primaryKey = 'country_id';
     public function Location(){

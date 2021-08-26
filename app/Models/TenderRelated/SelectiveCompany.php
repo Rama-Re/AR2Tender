@@ -11,4 +11,7 @@ class SelectiveCompany extends Model
     protected $table = 'selective_companies';
     protected $primaryKey = 'selective_company_id';
     public $timestamps = false;
+    public $incrementing = false;
+    protected $fillable = ['company_id','tender_id'];
+   
 }

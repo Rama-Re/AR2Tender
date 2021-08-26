@@ -23,7 +23,11 @@ use Illuminate\Support\Facades\Storage;
 */
 
 Route::get("/", function(){
+    $countries =['AE','SY'];
+    $generalTrait = new GeneralTrait;
+    return $generalTrait->returnData("countries",Country::whereIn('country_id', $countries)->get());
 
+/*
     $generalTrait= new GeneralTrait;
     $still = false;
     $tendersfromDB = Country::all();
@@ -51,7 +55,7 @@ Route::get("/", function(){
         return $generalTrait->returnSuccessMessage("uploaded successfully");
     }
     //dd(Storage::files('storage\app\public'));
-    //dd(StringHelperFunctions::between_last('/','.pdf',$str));
+    //dd(StringHelperFunctions::between_last('/','.pdf',$str));*/
 
 });
 

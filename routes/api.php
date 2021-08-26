@@ -42,6 +42,7 @@ Route::group(['middleware' => ['verifyUser','active_user']], function () {
     Route::post("user/login", [UserAuthController::class,'login']);
     Route::post("user/logout", [UserAuthController::class,'logout']);
 });
+Route::get("company/getProfile",[CompanyController::class,'getProfile']);
 
 Route::post("admin/register", [AdminController::class,'register']);
 
@@ -66,7 +67,7 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
     ///***///
     Route::group(['middleware' => ['checkType:company']], function () {
         Route::post("employee/register", [EmployeeController::class,'register']);
-        Route::get("company/getProfile",[CompanyController::class,'getProfile']);
+        //Route::get("company/getProfile",[CompanyController::class,'getProfile']);
         Route::get("company/changeStatus",[CompanyController::class,'changeStatus']);
         Route::delete("employee/destroyUser",[EmployeeController::class,'destroyUser']);
         Route::post("employee/sentEmailToRegister",[EmployeeController::class,'sentEmailToRegister']);
@@ -85,11 +86,12 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
 
 Route::group(['prefix' => 'tenders'], function () {
 
-
+    Route::post("/",[TenderController::class,'store']);
     Route::get("filter",[TenderController::class,'filter']);
     Route::get("indexSearch",[TenderController::class,'indexSearch']);
     Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);
     Route::get("indexSubmittedTo",[TenderController::class,'indexSubmittedTo']);
+    Route::put("/{tender}",[TenderController::class,'update'])->whereNumber('tender'); // in the web this make a problem so we put inside the form @method('PUT')
     
     
 });
@@ -114,3 +116,5 @@ Route::post("getUser",[UserAuthController::class,'getUser']);
 Route::get("index/{directory}",[FileController::class,'oneindex']);
 
 Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
+Route::get("getCountries",[CountryController::class,'getAllAsJSON']);
+

@@ -14,8 +14,11 @@ class Tender_file extends Model
 
     public function scopeIndex($query,$tender_id)
     {
-        return $query->select('name','size','path','type')
+        return $query->select('tender_files.file_id','name','size','path','type')
         ->join('files', 'files.file_id', '=', 'tender_files.file_id')
-        ->where('tender_id','=',$tender_id);
+        ->where('tender_id','=',$tender_id); 
     }
+    protected $attributes = [
+        'type' => 'other',
+    ];
 }

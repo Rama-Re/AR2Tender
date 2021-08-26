@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
 use Lcobucci\JWT\Signer\Ecdsa\Sha512;
 use PhpParser\Node\Stmt\Else_;
 
+use function PHPUnit\Framework\returnSelf;
+
 class FileController extends Controller
 {
     public static function decryptCollection($files){
@@ -37,9 +39,11 @@ class FileController extends Controller
         $fileId = $request->Id; // tenderId or SubmissionId
         //belongsto = 'tender', 'supplier'
         $fileName = $request->fileName;
-        dd(hash_file('sha1', public_path('files/' . $belongsto . '/' . $fileName . '.pdf')));
+       // dd(hash_file('sha1', public_path('files/' . $belongsto . '/' . $fileName )));
 
-        return response()->download(public_path('files/' . $belongsto . '/' . $fileName . '.pdf'));
+       return  Storage::get($request->fileName);
+       return response()->download(Storage::url($request->fileName));
+        //return response()->download('F:\Programming\laravel\projects\versions of project1\version_1\storage\app\public\files\tender\0c2y1gUzjbUkzhmWRtTufIQuYW3LR6WUWIicej3D.pdf');
     }
 
     public static function notAcceptedFiles($notAcceptedFiles)
@@ -61,12 +65,12 @@ class FileController extends Controller
             }
             return $generalTrait->returnError('402', $mes);
         } else {
-            return $generalTrait->returnSuccessMessage("uploaded successfully");
+            return true;
         }
     }
 
     public static function storeFiles(Request $request, $belongsto)
-    {
+    { 
         $generalTrait = new GeneralTrait;
         $notAccepted = array();
         if ($request->hasFile('file')) {
@@ -102,23 +106,44 @@ class FileController extends Controller
 
     }
 
+    public static function hashFile ($filePath){ 
+        // if extension is pdf convert it to txt
+        try{
+            $handle = fopen($filePath,'r');
+            $oFileContent = fread($handle,filesize($handle));
+            fclose($handle);
+            $encryptedFileContent=Crypt::encryptString($oFileContent);
+            $handle1 = fopen($filePath,'w');
+            fwrite($handle1,$encryptedFileContent);
+            fclose($handle1);
+            return true;
+        }catch(Exception $e){
+            return false;
+        }
+        
+        // change from text to pdf if pdf
+    }
+
     public static function store(Request $request, $belongsto)
     {
 
         $files = array();
-        
+
         foreach ($request->file as $file) {
+            $res = self::hashFile($file->getClientOriginalName());
+                
            // if ($file->extension() == 'pdf') {
                 $fileToDB = new File;
                 $name = $file->getClientOriginalName();
+                
                 $fileToDB->name = Crypt::encryptString(time() . '%' . $name); // I put the % to make it easy to get the name without the time
-        
                 $fileToDB->type = $request->fileType; // 'financial requirement','technician requirement','other'
                 $fileToDB->belongsto = $belongsto; //'tender', 'supplier'
                 $fileToDB->path = Crypt::encryptString($path =$file->store('public/files/' . $belongsto)); // maybe I should hash here
                 $fileToDB->size = NumberHelper::readableSize(Storage::size($path)); //not woked
                 $fileToDB->save();
                 array_push($files, $fileToDB->file_id);
+               
            // } else {
             //    array_push($files, Crypt::encryptString($path =$file->store('public/files/' . $belongsto)));
             //}
@@ -128,17 +153,24 @@ class FileController extends Controller
 
     }
 
-    public function delete(Request $request)
+   /* public static function destroy($file_id,$belongsto)
     {
-        /** not done it needs work */
         $generalTrait = new GeneralTrait();
-        $file = $request->id;
-
-        if (Storage::delete('public/files/' . $file->type . $file)) {
+        if($belongsto == 'tender'){
+            $res =Tender_file::where('file_id',$file_id)->delete();
+            
+        }else if($belongsto == 'supplier'){
+            $res =Supplier_file::where('file_id',$file_id)->delete();
+        }
+        if($res ==0){
+            return $generalTrait->returnError('400',"error happened the file could not deleted");
+        }
+        
+        if (Storage::delete('public/files/' . $belongsto . $file)) {
             return $generalTrait->returnSuccessMessage("the file " . $file . " is deleted");
         } else {
             return $generalTrait->returnError('404', "couldn't delete " . $file . " file");
         }
 
-    }
+    }*/
 }

@@ -80,15 +80,21 @@ class UserAuthController extends Controller
 
     public static function getUser(Request $request)
     {
-        $generalTrait = new GeneralTrait;
+        try{
+            $generalTrait = new GeneralTrait;
         $token = $request->header('token');
         $request->headers->set('token',(string)$token,true);
         $request->headers->set('Authorization','Bearer '.$token,true);
         $user = JWTAuth::parseToken()->authenticate($request);
-
         if($user)
             return $generalTrait->returnData('user',$user);
         else return $generalTrait->returnError('401','Something went wrong');
+
+        }catch(Exception $e){
+            return $generalTrait->returnError('401',$e->getMessage());
+        }
+        
+        
     }
 
     public function logout(Request $request)

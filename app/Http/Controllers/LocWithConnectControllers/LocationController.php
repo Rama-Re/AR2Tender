@@ -14,8 +14,8 @@ use App\Assets\Locations\City9;
 use App\Assets\Locations\FavCities;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
-use App\Models\LocationWithController\Location;
-
+use App\Models\LocationWithConnect\Location;
+use Illuminate\Http\Request;
 //set_time_limit(1000);
 use Illuminate\Support\Facades\DB;
 
@@ -89,6 +89,14 @@ class LocationController extends Controller
             return $generalTrait->returnSuccessMessage('cities added successfully');
         } else {
             return $generalTrait->returnError('403', 'the location table has elements');
+        }
+    }
+    public static function index(Request $request){
+        //the request has the country id 
+        $generalTrait = new GeneralTrait;
+        if($request->has('country_id')){
+            $locationsFromDB = Location::where('locations.country_id',$request->country_id)->get();
+            return $generalTrait->returnData('locations',$locationsFromDB);
         }
     }
 

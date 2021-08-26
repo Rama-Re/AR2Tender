@@ -14,7 +14,7 @@ class CreateSelectiveSpecialtyTable extends Migration
     public function up()
     {
         Schema::create('selective_specialty', function (Blueprint $table) {
-            $table->unsignedBigInteger('tender_id');
+            $table->unsignedBigInteger('tender_id')->unique();
             $table->foreign('tender_id')->references('tender_id')->on('tenders')->onDelete('cascade');
             $table->enum('specialty', ['medical', 'engineering-related','Raw materials','technical','technology-related','Other']);
         });

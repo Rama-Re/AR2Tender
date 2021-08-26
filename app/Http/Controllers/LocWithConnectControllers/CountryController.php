@@ -10,6 +10,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use function PHPUnit\Framework\returnSelf;
+
 class CountryController extends Controller
 {
 
@@ -261,6 +263,11 @@ class CountryController extends Controller
     
     public static function get_all(){
         return self::$countryArray; 
+    }
+    public static function getAllAsJSON(Request $request){
+        $countries = $request->countries;
+        $generalTrait = new GeneralTrait;
+        return $generalTrait->returnData("countries",Country::whereIn('country_id', $countries)->get);
     }
     public static function get_countries_names(){
         return array_column(self::$countryArray, 'name');

@@ -11,6 +11,8 @@ use App\Http\Controllers\CommitteeControllers\CommitteeController;
 use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
 use App\Http\Controllers\CommitteeControllers\VirtualCommitteeController;
 use App\Http\Controllers\CommitteeControllers\VirtualCommitteeMemberController;
+use App\Http\Controllers\JudgmentControllers\JudgmentOfCommitteeController;
+use App\Http\Controllers\JudgmentControllers\TenderResultController;
 use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
 use App\Http\Controllers\LocWithConnectControllers\LocationController;
@@ -19,6 +21,8 @@ use App\Http\Controllers\TenderRelatedControllers\SupplierFileController;
 use App\Http\Controllers\TenderRelatedControllers\TenderController;
 use App\Http\Controllers\TenderRelatedControllers\TenderFileController;
 use App\Models\Account\Employee;
+use App\Models\Judgment\JudgmentOfCommittee;
+use App\Models\Judgment\TenderResult;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,7 +75,6 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
     ///***///
     Route::group(['middleware' => ['checkType:company']], function () {
         Route::post("employee/register", [EmployeeController::class,'register']);
-        //Route::get("company/getProfile",[CompanyController::class,'getProfile']);
         Route::post("company/changeStatus",[CompanyController::class,'changeStatus']);
         Route::delete("employee/destroyUser",[EmployeeController::class,'destroyUser']);
         Route::post("employee/sentEmailToRegister",[EmployeeController::class,'sentEmailToRegister']);
@@ -89,13 +92,27 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         Route::post("virtual_committee/getVirtualCommittees",[VirtualCommitteeController::class,'getVirtualCommittees']);
         
         Route::post("company/notifyInvitedUsers",[TenderController::class,'notifyInvitedUsers']);
+        //الشركة أو عضو اللجنة
+        Route::post("Tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
+        Route::post("Committee/getResultOfMyOffers",[TenderResultController::class,'getResultOfMyOffers']);
     });
     ///***///
     //Employee Group
     ///***///
     Route::group(['middleware' => ['checkType:employee']], function () {
-        Route::get("employee/getProfile",[EmployeeController::class,'getProfile']);
-        Route::get("employee/getCommitteesOfEmployee",[CommitteeController::class,'getCommitteesOfEmployee']);
+        Route::post("employee/getProfile",[EmployeeController::class,'getProfile']);
+        Route::post("employee/getCommitteesOfEmployee",[CommitteeController::class,'getCommitteesOfEmployee']);
+        //مدير لجنة بالمناقصة وايدي المناقصة مطلوب
+        Route::group(['middleware' => []], function () {
+            Route::post("Committee/addJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'addJudgmentOfCommittee']);
+            Route::post("Tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
+        });
+        //مدير لجنة الإقرار وايدي المناقصة مطلوب
+        Route::group(['middleware' => []], function () {
+            Route::post("Committee/addTenderResult",[TenderResultController::class,'addTenderResult']);
+            Route::post("Tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
+            Route::post("Tender/notifysubmittedUsers",[TenderResultController::class,'notifysubmittedUsers']);
+        });
     });
 });
 

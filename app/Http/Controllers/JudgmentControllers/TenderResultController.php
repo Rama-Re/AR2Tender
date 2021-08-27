@@ -13,6 +13,7 @@ use App\Models\Judgment\TenderResult;
 use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
+use App\Http\Controllers\TenderRelatedControllers\TenderTrackController;
 use App\Models\Account\Company;
 use App\Models\TenderRelated\Tender;
 use Carbon\Carbon;
@@ -68,38 +69,43 @@ class TenderResultController extends Controller
         ->join('submit_forms','submit_forms.submit_form_id','=','tender_result.submit_form_id')
         ->where('submit_forms.company_id',$company_id)
         ->orderBy('submit_forms.created_at','asc');
-        $without_result = Tender::join('submit_forms','submit_forms.tender_id','=','tenders.tender_id')
+        $without_result = Tender::rightJoin('tender_result','tender_result.tender_id','!=','tenders.tender_id')
         ->join('tender_track','tender_track.tender_id','=','tenders.tender_id')
         ->where('tender_track.decision_committee_judgment_date_end','>',(new Carbon(now('UTC'))))
         ->where('submit_forms.company_id',$company_id)
         ->orderBy('submit_forms.created_at','asc');
+        
         return response()->json(GeneralTrait::returnData('offers',compact('with_result','without_result')));
     }
+    
     public function notifysubmittedUsers(Request $request)
     {
         $user_id = UserAuthController::getUser($request)['user']->user_id;
         $result = MyValidator::validation($request->only('tender_result_id'),['tender_result_id'=>'required']);
         if($result['status']){
-            $receivers = $this->emailsFromTender($request)['fcm_tokens']->reject( function($fcm_token)
-            {
-                return 
-            });
-            if($receivers['status']){
-                $company_name = Company::join('tenders','tenders.company_id','=','companies.company_id')
-                ->where('tenders.tender_id',$request->tender_id)
-                ->get('companies.company_name')->first()->company_name;
-                $tender_name = Tender::where('tender_id',$request->tender_id)->get('tender_name')->first()->tender_name;
-                $receivers = $receivers['fcm_tokens'];
+            $tender_name = Tender::where('tender_id',$request->tender_id)->get('tender_name')->first()->tender_name;
+            $receivers = 
+            
 
-                $data = NotificationController::getNoti($company_name,'invited you to tender: '.$tender_name,$user_id);
-                if(!$data['status']){
-                    return response()->json(GeneralTrait::returnError('404','couldn\'t generate notifications'));
-                }
-                return response()->json(GeneralTrait::returnData('notify',compact($receivers,$data)));
+            if(!$receivers) return response()->json(GeneralTrait::returnError('403','failed request'));
+            $data = NotificationController::getNoti($tender_name,'You lost',$user_id);
+            if(!$data['status']){
+                return response()->json(GeneralTrait::returnError('404','couldn\'t generate notifications'));
             }
-            else response()->json($receivers);
+            $notify1 = compact('receivers','data');
+            $receivers = TenderResult::join('tenders','tenders.tender_id','=','')
+            
+            
+            if(!$receivers) return response()->json(GeneralTrait::returnError('403','failed request'));
+            $data = NotificationController::getNoti($tender_name,'You won',$user_id);
+            if(!$data['status']){
+                return response()->json(GeneralTrait::returnError('404','couldn\'t generate notifications'));
+            }
+            $notify2 = compact('receivers','data');
+            return response()->json(GeneralTrait::returnData('notify',compact('notify1','notify2')));
         }
         return response()->json($result);
     }
+    
 }
 

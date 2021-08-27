@@ -111,20 +111,22 @@ class TenderController extends Controller
         //check the token from the request
         //and maybe need to check if the company status is tenderoffer or make the company unable to submit
 
-        $res = MyValidator::validation($request->only('filter'['category'], 'filter'['dateFilterSpecific'],
-            'filter'['dateFilterTenderTrack']['tenderTrcack'], 'filter'['dateFilterTenderTrack']['time'],
-            'filter'['selective']['companies'],'filter'['selective']['countries'],'filter'['selective']['specialty']
-            ,'filter'['open'],'order'), [
+        $res = MyValidator::validation($request->only('filter.category', 'filter.dateFilterSpecific',
+            'filter.dateFilterTenderTrack.tenderTrcack', 'filter.dateFilterTenderTrack.time',
+            'filter.selective.companies','filter.selective.countries','filter.selective.specialty'
+            ,'filter.open','order'), [
 
-            'filter'['category'] => 'in:medical,engineering-related,Raw materials,technical,technology-related,Other',
-            'filter'['dateFilterSpecific'] => 'date',
-            'filter'['dateFilterTenderTrack']['tenderTrcack'] => 'in:start_date,end_date,judging_offers_date_end,decision_committee_judgment_date_end',
-            'filter'['dateFilterTenderTrack']['time'] => 'in:befor,after',
-            'filter'['selective']['companies'] => 'array|exists:companies,company_id',
-            'filter'['selective']['countries'] => 'array|exists:countries,country_id',
-            'filter'['selective']['specialty'] => 'in:medical,engineering-related,Raw materials,technical,technology-related,Other|string',
-            'filter'['open'] => 'in:yes,no|string',
-            'order'=>'in:asc,desc|string'
+            'filter.category' => 'nullable|in:medical,engineering-related,Raw materials,technical,technology-related,Other',
+            'filter.dateFilterSpecific' => 'nullable|date',
+            'filter.dateFilterTenderTrack.tenderTrcack' => 'nullable|in:start_date,end_date,created_at',
+            'filter.dateFilterTenderTrack.time' => 'nullable|in:befor,after',
+            'filter.selective.companies' => 'nullable|array',
+            'filter.selective.companies.*.company_id' => 'exists:companies,company_id',
+            'filter.selective.countries' => 'nullable|array',
+            'filter.selective.countries.*.country_id' => 'exists:countries,country_id',
+            'filter.selective.specialty' => 'nullable|in:medical,engineering-related,Raw materials,technical,technology-related,Other|string',
+            'filter.open' => 'nullable|in:yes,no|string',
+            'order'=>'nullable|in:asc,desc|string'
         ]);
 
         if (!$res['status']) {
@@ -148,16 +150,14 @@ class TenderController extends Controller
         if ($category) {
             $indexFilterOnCategory = $this->indexFilterOnCategory($category);
             $tendersfromDB = $tendersfromDB->intersect($indexFilterOnCategory);
-
         }
 
         if ($dateFilterTenderTrack) {
             // check if this carbon::now is not static
-            $tz = $request->timeZone; // '3' for syria
             //$dateFilterSpecific = '2010-05-16'
             $date = $dateFilterSpecific ? new Carbon($dateFilterSpecific, 'UTC') : new Carbon(now('UTC'));
 
-            $indexFilterOnDate = $this->indexFilterOnDate($date, $dateFilterTenderTrack, $time, $tz);
+            $indexFilterOnDate = $this->indexFilterOnDate($date, $dateFilterTenderTrack, $time);
 
             $tendersfromDB = $tendersfromDB->intersect($indexFilterOnDate);
         }
@@ -195,7 +195,7 @@ class TenderController extends Controller
         return $tendersfromDB;
     }
 
-    public function indexFilterOnDate($date, $tenderTrack, $time, $tz)
+    public function indexFilterOnDate($date, $tenderTrack, $time)
     {
 
         // $date = date in the tz of the device

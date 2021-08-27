@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\JudgmentControllers;
 
+use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\UserAuthController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
@@ -14,6 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
 use App\Models\Account\Company;
 use App\Models\TenderRelated\Tender;
+use Carbon\Carbon;
 
 class TenderResultController extends Controller
 {
@@ -31,7 +33,6 @@ class TenderResultController extends Controller
     {
         $judgment = null;
         $judgment = TenderResult::where('tender_id',$request->tender_id)->get('submit_form_id')->first()->submit_form_id;
-        
         return response()->json(GeneralTrait::returnData('TenderResult',$judgment));
     }
     public function addTenderResult(Request $request)
@@ -45,6 +46,7 @@ class TenderResultController extends Controller
             $tender_id2 = (new SubmitFormController)->getTenderId($request);
             if($tender_id2 == -1) return response()->json(GeneralTrait::returnError('404','tender is not found'));
             if($tender_id1 != $tender_id2) return response()->json(GeneralTrait::returnError('403','wrong request'));
+            if((new TenderTrackController)->checkDecisionCommitteeJudgmentDate($tender_id1)){
             $temp = TenderResult::where('committee_member_id',$request->committee_member_id)
             ->where('tender_id',$tender_id1)->get()->first();
             if($temp) return response()->json(GeneralTrait::returnError('401','Desicion added before'));
@@ -55,7 +57,23 @@ class TenderResultController extends Controller
             if(!$judgment) return response()->json(GeneralTrait::returnError('401','something went wrong'));
             return response()->json(GeneralTrait::returnData('tender_result',$judgment,'Desicion added successfully'));
         }
+        return response()->json(GeneralTrait::returnError('401','this is not your judgment time'));
+        }
         return response()->json($result);
+    }
+    public function getResultOfMyOffers(Request $request)
+    {
+        $company_id = CompanyController::checkAndGetCompanyID($request);
+        $with_result = Tender::join('tender_result','tender_result.tender_id','=','tenders.tender_id')
+        ->join('submit_forms','submit_forms.submit_form_id','=','tender_result.submit_form_id')
+        ->where('submit_forms.company_id',$company_id)
+        ->orderBy('submit_forms.created_at','asc');
+        $without_result = Tender::join('submit_forms','submit_forms.tender_id','=','tenders.tender_id')
+        ->join('tender_track','tender_track.tender_id','=','tenders.tender_id')
+        ->where('tender_track.decision_committee_judgment_date_end','>',(new Carbon(now('UTC'))))
+        ->where('submit_forms.company_id',$company_id)
+        ->orderBy('submit_forms.created_at','asc');
+        return response()->json(GeneralTrait::returnData('offers',compact('with_result','without_result')));
     }
     public function notifysubmittedUsers(Request $request)
     {

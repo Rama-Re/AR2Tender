@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
 use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
 use App\Models\TenderRelated\Submit_form;
+use App\Http\Controllers\TenderRelatedControllers\TenderTrackController;
 
 class JudgmentOfCommitteeController extends Controller
 {
@@ -45,10 +46,12 @@ class JudgmentOfCommitteeController extends Controller
         }
         return response()->json(GeneralTrait::returnData('JudgmentOfCommittee',$judgment));
     }
+
     public function addJudgmentOfCommittee(Request $request)
     {
         $result = $this->validation($request);
         if($result['status']){
+
             $judgment = new JudgmentOfCommittee;
             $judgment->submit_form_id = $request->submit_form_id;
             $committee_member_id = ((new CommitteeMemberController)->getCommitteeMemberFromToken($request))['committee_member']->committee_member_id;
@@ -57,15 +60,18 @@ class JudgmentOfCommitteeController extends Controller
             $tender_id2 = (new SubmitFormController)->getTenderId($request);
             if($tender_id2 == -1) return response()->json(GeneralTrait::returnError('404','tender is not found'));
             if($tender_id1 != $tender_id2) return response()->json(GeneralTrait::returnError('403','wrong request'));
-            $temp = JudgmentOfCommittee::where('committee_member_id',$request->committee_member_id)
-            ->where('submit_form_id',$request->submit_form_id)->get()->first();
-            if($temp) return response()->json(GeneralTrait::returnError('401','Judgment added before'));
-            $judgment->committee_member_id = $committee_member_id;
-            $judgment->judgment = $request->judgment;
-            $judgment->vote = $request->vote;
-            $judgment->save();
-            if(!$judgment) return response()->json(GeneralTrait::returnError('401','something went wrong'));
-            return response()->json(GeneralTrait::returnSuccessMessage('judgment added successfully'));
+            if((new TenderTrackController)->checkJudgingOffersDate($tender_id1)){
+                $temp = JudgmentOfCommittee::where('committee_member_id',$request->committee_member_id)
+                ->where('submit_form_id',$request->submit_form_id)->get()->first();
+                if($temp) return response()->json(GeneralTrait::returnError('401','Judgment added before'));
+                $judgment->committee_member_id = $committee_member_id;
+                $judgment->judgment = $request->judgment;
+                $judgment->vote = $request->vote;
+                $judgment->save();
+                if(!$judgment) return response()->json(GeneralTrait::returnError('401','something went wrong'));
+                return response()->json(GeneralTrait::returnSuccessMessage('judgment added successfully'));
+            }
+            else return response()->json(GeneralTrait::returnError('401','this is not judgment time'));
         }
         return response()->json($result);
     }

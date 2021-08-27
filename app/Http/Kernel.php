@@ -73,5 +73,10 @@ class Kernel extends HttpKernel
         'json.response' => \App\Http\Middleware\ForceJsonResponse::class,
         'active_user' => \App\Http\Middleware\ActiveUser::class,
         'verifyUser' => \App\Http\Middleware\VerificationUser::class,
+        'CheckCompanyStatus' => \App\Http\Middleware\CheckCompanyStatus::class,
+        'CheckCommitteeMembertask' => \App\Http\Middleware\CheckCommitteeMembertask::class,
+        'CheckCommitteeType' => \App\Http\Middleware\CheckCommitteeType::class,
+        'CheckEmployeeID' => \App\Http\Middleware\CheckEmployeeID::class,
+
     ];
 }

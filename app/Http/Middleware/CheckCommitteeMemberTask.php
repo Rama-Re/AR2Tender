@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Controllers\CommitteeController\CommitteeMemberController;
+use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
 use App\Http\Controllers\GeneralTrait;
 use Closure;
 use Illuminate\Http\Request;

@@ -87,7 +87,8 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         
         Route::post("committee/getCommitteesOfTender",[CommitteeController::class,'getCommitteesOfTender']);
         Route::post("virtual_committee/getVirtualCommittees",[VirtualCommitteeController::class,'getVirtualCommittees']);
-
+        
+        Route::post("company/notifyInvitedUsers",[TenderController::class,'notifyInvitedUsers']);
     });
     ///***///
     //Employee Group
@@ -101,14 +102,12 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
 
 Route::group(['prefix' => 'tenders'], function () {
 
-    Route::post("/",[TenderController::class,'store']);
+    Route::post("/",[TenderController::class,'store'])->middleware('CheckCompanyStatus:TendersManager');
     Route::get("filter",[TenderController::class,'filter']);
     Route::get("indexSearch",[TenderController::class,'indexSearch']);
     Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);
     Route::get("indexSubmittedTo",[TenderController::class,'indexSubmittedTo']);
     Route::put("/{tender}",[TenderController::class,'update'])->whereNumber('tender'); // in the web this make a problem so we put inside the form @method('PUT')
-    
-    
 });
 Route::group(['prefix' => 'tender'], function () {
 

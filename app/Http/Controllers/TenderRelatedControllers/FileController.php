@@ -14,6 +14,7 @@ use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\File as FacadesFile;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\AcceptHeader;
 
@@ -23,11 +24,13 @@ class FileController extends Controller
 {
     public static function pathToUploadedFile( $path )
     {
-      $name = File::name( $path );
-      $extension = File::extension( $path );
+        
+      $name = FacadesFile::name( $path );
+      
+      $extension = FacadesFile::extension( $path );
       $originalName = $name . '.' . $extension;
-      $mimeType = File::mimeType( $path );
-      $size = File::size( $path );
+      $mimeType = FacadesFile::mimeType( $path );
+      $size = FacadesFile::size( $path );
       $error = false;
       $test = false;
       $object = new UploadedFile( $path, $originalName, $mimeType, $size, $error, $test );
@@ -68,8 +71,10 @@ class FileController extends Controller
             return GeneralTrait::returnData('path',$path);
         } 
         try{
-            $decRes = $this->decryptFile($path);
+            $decRes = $this->decryptFile(Storage::path($path));
+            dd(public_path($path));
             if($decRes==true){
+               
                 $file= response()->download(public_path($path));
                 $hashRes = $this->hashFile(public_path($path));
                 if($hashRes==true){
@@ -80,7 +85,8 @@ class FileController extends Controller
             }
             return GeneralTrait::returnError('404',"something went wrong");
         }catch(Exception $e){
-            return GeneralTrait::returnError('404',"couldn't open the file");
+            return GeneralTrait::returnError('404',$e->getMessage());
+            //return GeneralTrait::returnError('404',"couldn't open the file");
 
         }
     }
@@ -166,7 +172,9 @@ class FileController extends Controller
     public static function decryptFile ($filePath)
     {
         // if extension is pdf convert it to txt
+        
         $filePath = self::pathToUploadedFile($filePath);
+        
         try {
             $handle = fopen($filePath, 'r');
             $oFileContent = fread($handle,$filePath->getSize());

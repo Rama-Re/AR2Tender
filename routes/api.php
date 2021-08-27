@@ -114,4 +114,5 @@ Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
 
 Route::get("getLocations",[LocationController::class,'index']);
 Route::get("getCountries",[CountryController::class,'index']);
+Route::get("getCompanies",[CompanyController::class,'getAll']);
 

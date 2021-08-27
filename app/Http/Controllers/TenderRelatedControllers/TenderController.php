@@ -107,9 +107,30 @@ class TenderController extends Controller
     public function filter(Request $request)
     {
 
+
         //check the token from the request
         //and maybe need to check if the company status is tenderoffer or make the company unable to submit
 
+        $res = MyValidator::validation($request->only('filter'['category'], 'filter'['dateFilterSpecific'],
+            'filter'['dateFilterTenderTrack']['tenderTrcack'], 'filter'['dateFilterTenderTrack']['time'],
+            'filter'['selective']['companies'],'filter'['selective']['countries'],'filter'['selective']['specialty']
+            ,'filter'['open'],'order'), [
+
+            'filter'['category'] => 'in:medical,engineering-related,Raw materials,technical,technology-related,Other',
+            'filter'['dateFilterSpecific'] => 'date',
+            'filter'['dateFilterTenderTrack']['tenderTrcack'] => 'in:start_date,end_date,judging_offers_date_end,decision_committee_judgment_date_end',
+            'filter'['dateFilterTenderTrack']['time'] => 'in:befor,after',
+            'filter'['selective']['companies'] => 'array|exists:companies,company_id',
+            'filter'['selective']['countries'] => 'array|exists:countries,country_id',
+            'filter'['selective']['specialty'] => 'in:medical,engineering-related,Raw materials,technical,technology-related,Other|string',
+            'filter'['open'] => 'in:yes,no|string',
+            'order'=>'in:asc,desc|string'
+        ]);
+
+        if (!$res['status']) {
+            return $res;
+        }
+        
         $generalTrait = new GeneralTrait();
 
         $category = $request->filter['category'];
@@ -142,6 +163,7 @@ class TenderController extends Controller
         }
 
         if ($selectiveCompany) {
+            
             // tenders which been published by which companies
             $indexSelectiveCompany = $this->indexSelectiveCompany($selectiveCompany);
             $tendersfromDB = $tendersfromDB->intersect($indexSelectiveCompany);
@@ -213,7 +235,7 @@ class TenderController extends Controller
         $tendersfromDB = Tender::index()
             ->join('selective_' . $selectiveOn, 'tenders.tender_id', '=', 'selective_' . $selectiveOn . '.tender_id')
             ->whereIn('selective_' . $selectiveOn . '.' . $conditionOn, $selective)
-            ->where('tenders.selective', '==', $selectiveOn)
+            ->where('tenders.selective','=', $selectiveOn)
             ->active()
             ->get();
         return $tendersfromDB;

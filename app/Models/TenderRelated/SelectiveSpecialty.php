@@ -12,4 +12,8 @@ class SelectiveSpecialty extends Model
     public $table ='selective_specialty';
     public $incrementing = false;
     use HasFactory;
+    
+    public function Tender(){
+        return $this->belongsTo(Tender::class,'tender_id');
+    }
 }

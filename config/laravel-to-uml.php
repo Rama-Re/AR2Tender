@@ -15,13 +15,13 @@ return [
     'channels'      => false,
     'commands'      => false,
     'components'    => false,
-    'controllers'   => true,
+    'controllers'   => false,
     'events'        => false,
     'exceptions'    => false,
     'jobs'          => false,
     'listeners'     => false,
-    'mails'         => true,
-    'middlewares'   => true,
+    'mails'         => false,
+    'middlewares'   => false,
     'models'        => true,
     'notifications' => false,
     'observers'     => false,
@@ -36,8 +36,8 @@ return [
      * For more information: https://github.com/skanaar/nomnoml
      */
     'style' => [
-        'background' => '#071013',
-        'stroke'     => '#EBEBEB',
+        'background' => '#FFFFFF',
+        'stroke'     => '#000000',
         'arrowSize'  => 1,
         'bendSize'   => 0.3,
         'direction'  => 'down',
@@ -45,18 +45,18 @@ return [
         'edgeMargin' => 0,
         'gravity'    => 1,
         'edges'      => 'rounded',
-        'fill'       => '#3A6EA5',
+        'fill'       => '#4186E8',
         'fillArrows' => false,
-        'font'       => 'Calibri',
+        'font'       => 'Cocon',
         'fontSize'   => 12,
         'leading'    => 1.25,
-        'lineWidth'  => 3,
+        'lineWidth'  => 1,
         'padding'    => 8,
-        'spacing'    => 40,
+        'spacing'    => 20,
         'title'      => 'Filename',
         'zoom'       => 1,
-        'acyclicer'  => 'greedy',
-        'ranker'     => 'longest-path'
+        'acyclicer'  => 'graph',
+        'ranker'     => 'network-simplex'
     ],
 
     /**
@@ -64,6 +64,8 @@ return [
      * By default, all default Laravel classes are ignored.
      */
     'excludeFiles' => [
+        'Http/Controllers/GeneralTrait.php',
+        'Assets/Locations',
         'Http/Kernel.php',
         'Console/Kernel.php',
         'Exceptions/Handler.php',

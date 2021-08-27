@@ -10,15 +10,13 @@ use App\Models\TenderRelated\SelectiveCompany;
 use App\Models\TenderRelated\SelectiveCountry;
 use App\Models\TenderRelated\SelectiveSpecialty;
 use App\Models\TenderRelated\Tender;
-use Exception;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\Catch_;
 
 class SelectiveTenderController extends Controller
 {
     public static function validation(Request $request)
     {
-        return MyValidator::validation($request->only('selective','selective_on'),[
+        return MyValidator::validation($request->only('selective', 'selective_on'), [
             'selective' => 'required',
             'selective_on' => 'required',
         ]);
@@ -26,14 +24,13 @@ class SelectiveTenderController extends Controller
     public static function store(Request $request, $tender_id)
     {
         //'companies','specialty','countries'
-        
-        
+
         $selective = $request->selective;
         if ($selective == 'companies') {
             //  the front will give me the companyId now how ? ... they will call getAll function from CompanyController
             // and they will get all the companies with there ids when the user select an id they will put the ids in the request as an array
             $companiesIDS = $request->selective_on;
-            
+
             foreach ($companiesIDS as $companyID) {
                 $companiesSelective = new SelectiveCompany;
                 $companiesSelective->company_id = $companyID;
@@ -50,13 +47,13 @@ class SelectiveTenderController extends Controller
             //  the front will give me the countryID now how ? ... they will call getAllAsJSON function from CountryController
             // and they will get all the companies with there ids when the user select an id they will put the ids in the request as an array
             $countriesIDS = $request->selective_on;
-                foreach ($countriesIDS as $countryID) {
-                    $countriesSelective = new SelectiveCountry;
-                    $countriesSelective->country_id = $countryID;
-                    $countriesSelective->tender_id = $tender_id;
-                    $countriesSelective->save();
-                }
-            
+            foreach ($countriesIDS as $countryID) {
+                $countriesSelective = new SelectiveCountry;
+                $countriesSelective->country_id = $countryID;
+                $countriesSelective->tender_id = $tender_id;
+                $countriesSelective->save();
+            }
+
         }
 
     }
@@ -100,5 +97,21 @@ class SelectiveTenderController extends Controller
     {
         self::destroy($request, $tender_id);
         self::store($request, $tender_id);
+    }
+    public function show($tenderID, $selective)
+    {
+        $selectiveOn = null;
+        if ($selective == 'companies') {
+            $selectiveOn = SelectiveCompany::name()->where('tender_id', $tenderID)->get();
+
+        } else if ($selective == 'specialty') {
+            $selectiveOn = SelectiveSpecialty::where('tender_id', $tenderID)->get(['specialty']);
+        } else if ($selective == 'countries') {
+            $selectiveOn = SelectiveCountry::name()->where('tender_id', $tenderID)->get();
+
+        }
+        
+        return $selectiveOn;
+
     }
 }

@@ -13,8 +13,14 @@ class Supplier_file extends Model
 
     public function scopeIndex($query,$submitId)
     {
-        return $query->select('supplier_files.file_id','name','size','path','type')
+        return $query->select('files.file_id','name','size','path','type')
         ->join('files', 'files.file_id', '=', 'supplier_files.file_id')
         ->where('submit_form_id','=',$submitId);
+    }
+    public function File(){
+        return $this->belongsTo(File::class,'file_id');
+    }
+    public function Supplier_file(){
+        return $this->belongsTo(Supplier_file::class,'submit_form_id');
     }
 }

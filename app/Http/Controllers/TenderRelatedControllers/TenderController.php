@@ -107,9 +107,32 @@ class TenderController extends Controller
     public function filter(Request $request)
     {
 
+
         //check the token from the request
         //and maybe need to check if the company status is tenderoffer or make the company unable to submit
 
+        $res = MyValidator::validation($request->only('filter.category', 'filter.dateFilterSpecific',
+            'filter.dateFilterTenderTrack.tenderTrcack', 'filter.dateFilterTenderTrack.time',
+            'filter.selective.companies','filter.selective.countries','filter.selective.specialty'
+            ,'filter.open','order'), [
+
+            'filter.category' => 'nullable|in:medical,engineering-related,Raw materials,technical,technology-related,Other',
+            'filter.dateFilterSpecific' => 'nullable|date',
+            'filter.dateFilterTenderTrack.tenderTrcack' => 'nullable|in:start_date,end_date,created_at',
+            'filter.dateFilterTenderTrack.time' => 'nullable|in:befor,after',
+            'filter.selective.companies' => 'nullable|array',
+            'filter.selective.companies.*.company_id' => 'exists:companies,company_id',
+            'filter.selective.countries' => 'nullable|array',
+            'filter.selective.countries.*.country_id' => 'exists:countries,country_id',
+            'filter.selective.specialty' => 'nullable|in:medical,engineering-related,Raw materials,technical,technology-related,Other|string',
+            'filter.open' => 'nullable|in:yes,no|string',
+            'order'=>'nullable|in:asc,desc|string'
+        ]);
+
+        if (!$res['status']) {
+            return $res;
+        }
+        
         $generalTrait = new GeneralTrait();
 
         $category = $request->filter['category'];
@@ -122,26 +145,25 @@ class TenderController extends Controller
         $open = $request->filter['open'];
 
         $order = ($request->order == "asc" || $request->order == "desc") ? $request->order : "desc";
-        $tendersfromDB = $this->index($order, $dateFilterTenderTrack);
+        $tendersfromDB = $this->index($order, $dateFilterTenderTrack)->where('tender_track.end_date','<',new Carbon(now('UTC')));
 
         if ($category) {
             $indexFilterOnCategory = $this->indexFilterOnCategory($category);
             $tendersfromDB = $tendersfromDB->intersect($indexFilterOnCategory);
-
         }
 
         if ($dateFilterTenderTrack) {
             // check if this carbon::now is not static
-            $tz = $request->timeZone; // '3' for syria
             //$dateFilterSpecific = '2010-05-16'
             $date = $dateFilterSpecific ? new Carbon($dateFilterSpecific, 'UTC') : new Carbon(now('UTC'));
 
-            $indexFilterOnDate = $this->indexFilterOnDate($date, $dateFilterTenderTrack, $time, $tz);
+            $indexFilterOnDate = $this->indexFilterOnDate($date, $dateFilterTenderTrack, $time);
 
             $tendersfromDB = $tendersfromDB->intersect($indexFilterOnDate);
         }
 
         if ($selectiveCompany) {
+            
             // tenders which been published by which companies
             $indexSelectiveCompany = $this->indexSelectiveCompany($selectiveCompany);
             $tendersfromDB = $tendersfromDB->intersect($indexSelectiveCompany);
@@ -173,7 +195,7 @@ class TenderController extends Controller
         return $tendersfromDB;
     }
 
-    public function indexFilterOnDate($date, $tenderTrack, $time, $tz)
+    public function indexFilterOnDate($date, $tenderTrack, $time)
     {
 
         // $date = date in the tz of the device
@@ -213,7 +235,7 @@ class TenderController extends Controller
         $tendersfromDB = Tender::index()
             ->join('selective_' . $selectiveOn, 'tenders.tender_id', '=', 'selective_' . $selectiveOn . '.tender_id')
             ->whereIn('selective_' . $selectiveOn . '.' . $conditionOn, $selective)
-            ->where('tenders.selective', '==', $selectiveOn)
+            ->where('tenders.selective','=', $selectiveOn)
             ->active()
             ->get();
         return $tendersfromDB;
@@ -372,21 +394,29 @@ class TenderController extends Controller
         }
 
     }
-    public static function showToPublic(Request $request)
+    public static function showToPublic(Request $request,$tender)
     {
-        // details of a tender or public view
-        //validate if there is tender_id
         $generalTrait = new GeneralTrait;
         try {
-            $tender = Tender::index()->addSelect('tenders.company_id', 'start_date', 'description', 'type', 'selective', 'category')->where('tenders.active', '=', true)->findOrFail($request->tender_id);
+            if (Tender::where('tender_id',$tender)->value('type')== 'open') {
+               
+            }
+            $tenderFromDB = Tender::index()->addSelect('tenders.company_id', 'start_date', 'description', 'tenders.type', 'selective', 'category')
+            ->where('tenders.active', '=', true)
+            ->where('tenders.tender_id',$tender)
+            ->get()->first();
+
         } catch (Exception $e) {
-            return $generalTrait->returnError('404', 'the tender you are trying to reach is not existed');
+            return $generalTrait->returnError('404', $e->getMessage());
+        
+            //return $generalTrait->returnError('404', 'the tender you are trying to reach is not existed');
         }
-        return $generalTrait->returnData('tender', $tender);
+        
+        return $generalTrait->returnData('tender', $tenderFromDB);
         ///+ show files
 
     }
-    public static function showToOwner(Request $request)
+    public static function showToOwner(Request $request,$tender)
     {
         // details of a tender or public view
         //validate if there is tender_id

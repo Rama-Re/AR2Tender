@@ -117,8 +117,11 @@ class EmployeeController extends Controller
     public function editProfile(Request $request)
     {
         $user_id = UserAuthController::getUser($request)['user']->user_id;
-        $company_id = Company::where('user_id',$user_id)->get('company_id')->first()->company_id;
+        $company_id = Company::where('user_id',$user_id)->get('company_id')->first();
+        if($company_id) $company_id = $company_id->company_id;
+        else return response()->json(GeneralTrait::returnError('404','Company not found'));
         $employee = Employee::where('employee_id',$request->employee_id)->get()->first();
+        if(!$employee) return response()->json(GeneralTrait::returnError('404','Company not found'));
         if($company_id != $employee->company_id){return response()->json(GeneralTrait::returnError('403','this is not your employee'));}
         $employee->employee_name = $request->employee_name;
         $employee->user_id = $user_id;

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\CommitteeController;
+namespace App\Http\Controllers\CommitteeControllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
 use App\Http\Controllers\MyValidator;
 use App\Models\CommitteeRelations\VirtualCommitteeMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\CommitteeRelations\VirtualCommittee;
 
 class VirtualCommitteeMemberController extends Controller
 {
@@ -15,7 +16,7 @@ class VirtualCommitteeMemberController extends Controller
         $rules = [
             'virtual_committee_id' => 'required',
             'employee_id' => 'required',
-            'task' => 'required|in:administrator,viewer,discussant'
+            'task' => 'required|in:administrator,member'
         ];
         return MyValidator::validation($data,$rules);
     }
@@ -28,6 +29,11 @@ class VirtualCommitteeMemberController extends Controller
             $virtualCommitteeMember->virtual_committee_id = $request->virtual_committee_id;
             $virtualCommitteeMember->employee_id = $request->employee_id;
             $virtualCommitteeMember->task = $request->task;
+            $checkMember = VirtualCommitteeMember::where('virtual_committee_id',$request->virtual_committee_id)
+            ->where('employee_id',$request->employee_id)
+            ->where('task',$request->task)->get()->first();
+            if($checkMember) 
+            return response()->json($generalTrait->returnError('403','this member is already added'));
             $virtualCommitteeMember->save();
             if(!$virtualCommitteeMember){
                 return response()->json($generalTrait->returnError('403','Some thing went wrong'));
@@ -36,6 +42,21 @@ class VirtualCommitteeMemberController extends Controller
             return response()->json($generalTrait->returnData('virtualCommitteeMember',$virtualCommitteeMember,'VirtualCommitteeMember created successfully'));
         }
         else return response()->json($result);
+    }
+    public function addMembers($committee_id, $members)
+    {
+        $status = true;
+        foreach($members as $member){
+            $committeeMember = new VirtualCommitteeMember;
+            $committeeMember->virtual_committee_id = $committee_id;
+            $committeeMember->employee_id = $member['employee_id'];
+            $committeeMember->task = $member['task'];
+            $checkMember = VirtualCommitteeMember::where('virtual_committee_id',$committee_id)->where('employee_id',$member['employee_id'])->get()->first();
+            if($checkMember) continue;
+            $committeeMember->save();
+            if(!$committeeMember) $status = false;
+        }
+        return $status;
     }
     public function getVirtualCommitteeMembers(Request $request)
     {

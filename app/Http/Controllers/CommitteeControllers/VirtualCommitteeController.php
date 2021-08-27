@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\CommitteeController;
+namespace App\Http\Controllers\CommitteeControllers;
 
 use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\UserAuthController;
@@ -17,10 +17,13 @@ use Illuminate\Support\Facades\Validator;
 class VirtualCommitteeController extends Controller
 {
     public static function validation(Request $request){
-        $data = $request->only('employee_id','type');
+        $data = $request->only('company_id','type','members');
         $rules = [
             'company_id' => 'required',
-            'type' => 'required|in:financial,technician,decision_maker'
+            'type' => 'required|in:financial,technician,decision maker',
+            'members' => 'required|array',
+            'members.*.task'=> 'required',
+            'members.*.employee_id'=> 'required',
         ];
         return MyValidator::validation($data,$rules);
     }
@@ -29,20 +32,30 @@ class VirtualCommitteeController extends Controller
         $result = $this->validation($request);
         if($result["status"]){
             $virtualCommittee = new VirtualCommittee;
-            $virtualCommittee->company_id = $request->company_id;
-            $virtualCommittee->employee_id = $request->employee_id;
+            $company_id = CompanyController::checkAndGetCompanyID($request);
+            $virtualCommittee->company_id = $company_id;
             $virtualCommittee->type = $request->type;
+            $checkMember = VirtualCommittee::where('company_id',$company_id)->where('type',$request->type)->get()->first();
+            if($checkMember) return response()->json(GeneralTrait::returnError('403','this type of committee is exist'));
             $virtualCommittee->save();
             if(!$virtualCommittee){
                 return response()->json(GeneralTrait::returnError('403','Some thing went wrong'));
+            }
+            $addMembers = (new VirtualCommitteeMemberController)->addMembers($virtualCommittee->virtual_committee_id,$request->members);
+            if(!$addMembers){
+                $virtualCommittee->delete();
+                return response()->json(GeneralTrait::returnError('403','wrong in add committee members'));
             }
             return response()->json(GeneralTrait::returnData('virtualCommittee',$virtualCommittee,'VirtualCommittee created successfully'));
         }
         else return response()->json($result);
     }
+
     public function getVirtualCommittees(Request $request)
     {
-        $virtualCommittees = VirtualCommittee::where('company_id',$request->company_id)->get();
+        $virtualCommittees = VirtualCommittee::join('virtual_committee_members','virtual_committee_members.virtual_committee_id','=','virtual_committees.virtual_committee_id')
+        ->join('employees','employees.employee_id','=','virtual_committee_members.employee_id')
+        ->where('virtual_committees.company_id',$request->company_id)->get();
         if($virtualCommittees){
             return GeneralTrait::returnData('virtualCommittees',$virtualCommittees,"suscess");
         }

@@ -7,6 +7,10 @@ use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\AccountControllers\EmployeeController;
 use App\Http\Controllers\AccountControllers\FCMTokenController;
 use App\Http\Controllers\AccountControllers\UserController;
+use App\Http\Controllers\CommitteeControllers\CommitteeController;
+use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
+use App\Http\Controllers\CommitteeControllers\VirtualCommitteeController;
+use App\Http\Controllers\CommitteeControllers\VirtualCommitteeMemberController;
 use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
 use App\Http\Controllers\LocWithConnectControllers\LocationController;
@@ -74,12 +78,23 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         Route::put("company/editProfile",[CompanyController::class,'editProfile']);
         Route::put("employee/editProfile",[EmployeeController::class,'editProfile']);
         Route::put("user/editPassword",[UserAuthController::class,'editPassword']);
+        
+        Route::post("committee/create",[CommitteeController::class,'create']);
+        Route::post("virtual_committee/create",[VirtualCommitteeController::class,'create']);
+        
+        Route::post("committee/addMember",[CommitteeMemberController::class,'create']);
+        Route::post("virtual_committee/addMember",[VirtualCommitteeMemberController::class,'create']);
+        
+        Route::get("committee/getCommitteesOfTender",[CommitteeController::class,'getCommitteesOfTender']);
+        Route::get("virtual_committee/getVirtualCommittees",[VirtualCommitteeController::class,'getVirtualCommittees']);
+
     });
     ///***///
     //Employee Group
     ///***///
     Route::group(['middleware' => ['checkType:employee']], function () {
         Route::get("employee/getProfile",[EmployeeController::class,'getProfile']);
+        Route::get("employee/getCommitteesOfEmployee",[CommitteeController::class,'getCommitteesOfEmployee']);
     });
 });
 

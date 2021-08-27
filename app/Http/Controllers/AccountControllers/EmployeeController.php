@@ -18,7 +18,6 @@ class EmployeeController extends Controller
     public static function validation(Request $request){
         return MyValidator::validation($request->only('employee_name','company_id'), [
             'employee_name' => 'required|string',
-            'company_id'=> 'required'
         ]);
     }
     public function register(Request $request){
@@ -28,11 +27,12 @@ class EmployeeController extends Controller
         if($result["status"]){
             $result2 = $this->validation($request);
             if($result2["status"]){
+                $company_id = Company::where('user_id',UserAuthController::getUser($request)['user']->user_id)->get('company_id')->first()->company_id;
                 //Request is valid, create new user
                 $response = $userC->register($request);
                 $employee = new Employee;
                 $employee->employee_name = $request->employee_name;
-                $employee->company_id = $request->company_id;
+                $employee->company_id = $company_id;
                 $employee->user_id = ($response["user"])->user_id;
                 $user = User::find(($response["user"])->user_id);
                 $user->is_verified = true;
@@ -97,7 +97,7 @@ class EmployeeController extends Controller
                     'title'=> $company_name.'\nYou have to sign in at AR2Tender Application with this account',
                     'body'=> 'email: '.$employee->email.'\npassword: '.$request->password
                 ];
-                Mail::to($request->email)->send(new \App\Mail\SampleMail($details));
+                Mail::to($employee->email)->send(new \App\Mail\SampleMail($details));
                 return response()->json(GeneralTrait::returnSuccessMessage('email send successfully'));
             }
             else return response()->json($result);

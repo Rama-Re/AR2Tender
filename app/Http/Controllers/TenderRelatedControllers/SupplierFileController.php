@@ -15,7 +15,7 @@ class SupplierFileController extends Controller
         $generaltrait = new GeneralTrait;
         $res = FileController::storeFiles($request,'supplier');
         if($res === true){
-            return $generaltrait->returnSuccessMessage("files uploaded successfully");
+            return $generaltrait->returnData('files_id',$res,"storedSuccessfuly");
         }
         else return $res;
     }
@@ -35,7 +35,7 @@ class SupplierFileController extends Controller
         return $generaltrait->returnData('files',$filesFromDB);
            
     }
-    public function destroy(Request $request)
+   /* public function destroy(Request $request)
     {
        // request has file_id
        $generalTrait =  new GeneralTrait;
@@ -44,6 +44,6 @@ class SupplierFileController extends Controller
         return $generalTrait->returnSuccessMessage("file deleted successfully");
     }
     else return $res;
-    }
+    }*/
 
 }

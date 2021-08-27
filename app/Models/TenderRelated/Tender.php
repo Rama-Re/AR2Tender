@@ -2,6 +2,8 @@
 
 namespace App\Models\TenderRelated;
 
+use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
+use App\Models\Account\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -40,6 +42,31 @@ class Tender extends Model
     public function scopeActive($query){
         return $query->where('tenders.active','=',true);
     }
+
+    public function SelectiveCompany(){
+        return $this->hasMany(SelectiveCompany::class,'tender_id');
+    }
+    public function SelectiveCountry(){
+        return $this->hasMany(SelectiveCountry::class,'tender_id');
+    }
+    public function Submit_form(){
+        return $this->hasMany(Submit_form::class,'tender_id');
+    }
+    public function Tender_track(){
+        return $this->hasOne(Tender_track::class,'tender_id');
+    }
+    public function SelectiveSpecialty(){
+        return $this->hasOne(SelectiveSpecialty::class,'tender_id');
+    }
+    public function Tender_file(){
+        return $this->hasMany(Tender_file::class,'tender_id');
+    }
     
+    public function Company(){
+        return $this->belongsTo(Company::class,'company_id');
+    }
+
+
+
 
 }

@@ -6,6 +6,8 @@ use App\Models\Account\Employee;
 use App\Models\CommitteeRelations\VirtualCommittee;
 use App\Models\LocationWithController\CompanyLocation;
 use App\Models\LocationWithController\Phone;
+use App\Models\TenderRelated\SelectiveCompany;
+use App\Models\TenderRelated\Submit_form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -68,7 +70,13 @@ class Company  extends Authenticatable implements JWTSubject
     public function VirtualCommittee(){
         return $this->hasMany(VirtualCommittee::class,'company_id');
     }
-
+    
+    public function SelectiveCompany(){
+        return $this->hasMany(SelectiveCompany::class,'company_id');
+    }
+    public function Submit_form(){
+        return $this->hasMany(Submit_form::class,'company_id');
+    }
 
     
 }

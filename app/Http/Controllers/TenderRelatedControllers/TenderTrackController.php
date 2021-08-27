@@ -99,13 +99,11 @@ class TenderTrackController extends Controller
     }
     public function checkJudgingOffersDate ($tender_id){
        try{
-          $endTender= Tender_track::where('tender_id', $tender_id)->value('end_date'); 
-           if($endTender >= new Carbon(now('UTC'))){
+          $endTender= Tender_track::where('tender_id', $tender_id)->get('end_date')->first(); 
+           if(Carbon::now('UTC')->between($endTender->end_date,$endTender->judging_offers_date_end)){
+            return true;
+           }
                return false;
-           }
-           else {
-               return true;
-           }
        } catch(Exception $e){
            return false;
        }
@@ -114,11 +112,11 @@ class TenderTrackController extends Controller
     public function checkDecisionCommitteeJudgmentDate ($tender_id){
         try{
             $judgingEndDate= Tender_track::where('tender_id', $tender_id)->value('end_date'); 
-             if($judgingEndDate >= new Carbon(now('UTC'))){
-                 return false;
+             if(new Carbon(now('UTC')) >= $judgingEndDate ){
+                 return true;
              }
              else {
-                 return true;
+                 return false;
              }
          } catch(Exception $e){
              return false;

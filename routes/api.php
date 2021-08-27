@@ -81,8 +81,9 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
 
 Route::group(['prefix' => 'tenders'], function () {
 
-    Route::post("/",[TenderController::class,'store']);
+    Route::post("/",[TenderController::class,'store'])->middleware(['checkType:company']);
     Route::get("filter",[TenderController::class,'filter']);
+    Route::get("/public/{tender}",[TenderController::class,'showToPublic'])->whereNumber('tender'); ;
     Route::get("indexSearch",[TenderController::class,'indexSearch']);
     Route::get("indexMyTenders",[TenderController::class,'indexMyTenders']);
     Route::get("indexSubmittedTo",[TenderController::class,'indexSubmittedTo']);
@@ -96,6 +97,7 @@ Route::group(['prefix' => 'tender'], function () {
     //Route::post("storefiles/{tender_id}",[TenderFileController::class,'store'])->whereNumber('tender_id');
     Route::post("storefiles",[TenderFileController::class,'store']);
     Route::get("indexfiles",[TenderFileController::class,'index']);
+    Route::get("/files/file",[FileController::class,'oneindex']);
     
 });
 Route::group(['prefix' => 'supplier'], function () {

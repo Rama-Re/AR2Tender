@@ -15,6 +15,9 @@ class Tender_track extends Model
     protected $dates = ['start_date','end_date','judging_offers_date'
     ,'judging_offers_by_administrator_date','decision_committee_judgment_date',
     'administrator_decision_committee_judgment_date','announcing_result_date'];
-
+    
+    public function Tender(){
+        return $this->belongsTo(Tender::class,'tender_id');
+    }
 
 }

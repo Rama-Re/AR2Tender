@@ -164,7 +164,7 @@ class CompanyController extends Controller
     public function changeStatus(Request $request){
         $generalTrait = new GeneralTrait;
         $user = UserAuthController::getUser($request)['user'];
-        $user_id = $user['user_id'];
+        $user_id = $user->user_id;
         $company = Company::where('user_id',$user_id)->get()->first();
         if(Company::find($company->company_id)->get('status')->first()->status == 'TenderOffer')
         {

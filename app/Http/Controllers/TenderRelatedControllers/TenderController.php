@@ -145,7 +145,7 @@ class TenderController extends Controller
         $open = $request->filter['open'];
 
         $order = ($request->order == "asc" || $request->order == "desc") ? $request->order : "desc";
-        $tendersfromDB = $this->index($order, $dateFilterTenderTrack);
+        $tendersfromDB = $this->index($order, $dateFilterTenderTrack)->where('tender_track.end_date','<',new Carbon(now('UTC')));
 
         if ($category) {
             $indexFilterOnCategory = $this->indexFilterOnCategory($category);
@@ -394,21 +394,29 @@ class TenderController extends Controller
         }
 
     }
-    public static function showToPublic(Request $request)
+    public static function showToPublic(Request $request,$tender)
     {
-        // details of a tender or public view
-        //validate if there is tender_id
         $generalTrait = new GeneralTrait;
         try {
-            $tender = Tender::index()->addSelect('tenders.company_id', 'start_date', 'description', 'type', 'selective', 'category')->where('tenders.active', '=', true)->findOrFail($request->tender_id);
+            if (Tender::where('tender_id',$tender)->value('type')== 'open') {
+               
+            }
+            $tenderFromDB = Tender::index()->addSelect('tenders.company_id', 'start_date', 'description', 'tenders.type', 'selective', 'category')
+            ->where('tenders.active', '=', true)
+            ->where('tenders.tender_id',$tender)
+            ->get()->first();
+
         } catch (Exception $e) {
-            return $generalTrait->returnError('404', 'the tender you are trying to reach is not existed');
+            return $generalTrait->returnError('404', $e->getMessage());
+        
+            //return $generalTrait->returnError('404', 'the tender you are trying to reach is not existed');
         }
-        return $generalTrait->returnData('tender', $tender);
+        
+        return $generalTrait->returnData('tender', $tenderFromDB);
         ///+ show files
 
     }
-    public static function showToOwner(Request $request)
+    public static function showToOwner(Request $request,$tender)
     {
         // details of a tender or public view
         //validate if there is tender_id

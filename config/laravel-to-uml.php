@@ -27,7 +27,7 @@ return [
     'observers'     => false,
     'policies'      => false,
     'providers'     => false,
-    'requests'      => true,
+    'requests'      => false,
     'resources'     => false,
     'rules'         => false,
 
@@ -38,25 +38,25 @@ return [
     'style' => [
         'background' => '#FFFFFF',
         'stroke'     => '#000000',
-        'arrowSize'  => 1,
-        'bendSize'   => 0.3,
+        'arrowSize'  => 0,
+        'bendSize'   => 1,
         'direction'  => 'down',
         'gutter'     => 5,
-        'edgeMargin' => 0,
+        'edgeMargin' => 3,
         'gravity'    => 1,
         'edges'      => 'rounded',
         'fill'       => '#4186E8',
-        'fillArrows' => false,
+        'fillArrows' => true,
         'font'       => 'Cocon',
         'fontSize'   => 12,
         'leading'    => 1.25,
         'lineWidth'  => 1,
         'padding'    => 8,
-        'spacing'    => 20,
+        'spacing'    => 10,
         'title'      => 'Filename',
         'zoom'       => 1,
         'acyclicer'  => 'graph',
-        'ranker'     => 'network-simplex'
+        'ranker'     => 'tight-tree'
     ],
 
     /**

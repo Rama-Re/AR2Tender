@@ -106,8 +106,8 @@ class CompanyController extends Controller
         $result = UserAuthController::getUser($request);
         
         if(!$result["status"]){
-            if($request->hasHeader('company_id')){
-                $user = Company::where('company_id',$request->headers->get('company_id'))->get('user_id')->first();
+            if($request->has('company_id')){
+                $user = Company::where('company_id',$request->company_id)->get('user_id')->first();
                 if(!$user){
                     return response()->json($generalTrait ->returnError('404','failed request'));
                 }

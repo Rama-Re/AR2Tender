@@ -20,7 +20,7 @@ class Supplier_file extends Model
     public function File(){
         return $this->belongsTo(File::class,'file_id');
     }
-    public function Supplier_file(){
-        return $this->belongsTo(Supplier_file::class,'submit_form_id');
+    public function Submit_form(){
+        return $this->belongsTo(Submit_form::class,'submit_form_id');
     }
 }

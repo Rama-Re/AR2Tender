@@ -7,7 +7,7 @@ use App\Http\Controllers\GeneralTrait;
 use App\Http\Controllers\MyValidator;
 use App\Models\Judgment\JudgmentOfCommittee;
 use Illuminate\Http\Request;
-use App\Http\Controllers\CommitteeController\CommitteeMemberController;
+use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
 use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
 use App\Models\TenderRelated\Submit_form;
 

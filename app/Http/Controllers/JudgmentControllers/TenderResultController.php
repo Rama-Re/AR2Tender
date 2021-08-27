@@ -9,7 +9,7 @@ use App\Http\Controllers\MyValidator;
 use GrahamCampbell\ResultType\Result;
 use Illuminate\Http\Request;
 use App\Models\Judgment\TenderResult;
-use App\Http\Controllers\CommitteeController\CommitteeMemberController;
+use App\Http\Controllers\CommitteeControllers\CommitteeMemberController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
 use App\Models\Account\Company;

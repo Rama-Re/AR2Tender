@@ -141,7 +141,7 @@ class UserAuthController extends Controller
         $generalTrait = new GeneralTrait;
         try{
             $validator = Validator::make($request->only('email'), [
-                'email' => 'required|email',
+                'email' => 'required|email|exists:users,email',
             ]);
             if(!$validator['status']) return response()->json($validator);
             $confirmCode = random_int(100000,999999);

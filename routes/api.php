@@ -35,7 +35,7 @@ use App\Models\Account\Employee;
 //Route::get("company/getCompanyById", [CompanyController::class,'getCompanyById']);
 Route::post("company/register", [CompanyController::class,'register']);
 Route::post("company/upload", [CompanyController::class,'uploadCompanyPhoto']);
-Route::get("company/getProfile",[CompanyController::class,'getProfile']);
+Route::post("company/getProfile",[CompanyController::class,'getProfile']);
 
 Route::post("user/verifyAccount", [UserAuthController::class,'verifyAccount']);
 Route::post("user/confirmCode", [UserAuthController::class,'confirmCode']);
@@ -46,7 +46,7 @@ Route::group(['middleware' => ['verifyUser','active_user']], function () {
     Route::post("user/login", [UserAuthController::class,'login']);
     Route::post("user/logout", [UserAuthController::class,'logout']);
 });
-Route::get("company/getProfile",[CompanyController::class,'getProfile']);
+Route::post("company/getProfile",[CompanyController::class,'getProfile']);
 
 Route::post("admin/register", [AdminController::class,'register']);
 
@@ -59,12 +59,12 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
     Route::group(['middleware' => ['checkType:admin']], function () {
         Route::post("saveCountries", [CountryController::class,'save']);
         Route::post("saveCities", [LocationController::class,'save']);
-        Route::get("admin/getProfile",[AdminController::class,'getProfile']);
-        Route::get("getAllCompanies",[CompanyController::class,'getall']);
-        Route::get("user/bloackUser",[UserAuthController::class,'bloackUser']);
-        Route::get("user/unbloackUser",[UserAuthController::class,'unbloackUser']);
-        Route::put("user/editPassword",[UserAuthController::class,'editPassword']);
-        Route::put("admin/editProfile",[AdminController::class,'editProfile']);
+        Route::post("admin/getProfile",[AdminController::class,'getProfile']);
+        Route::post("getAllCompanies",[CompanyController::class,'getall']);
+        Route::post("user/bloackUser",[UserAuthController::class,'bloackUser']);
+        Route::post("user/unbloackUser",[UserAuthController::class,'unbloackUser']);
+        Route::post("user/editPassword",[UserAuthController::class,'editPassword']);
+        Route::post("admin/editProfile",[AdminController::class,'editProfile']);
     });
     ///***///
     //Company Group
@@ -72,7 +72,7 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
     Route::group(['middleware' => ['checkType:company']], function () {
         Route::post("employee/register", [EmployeeController::class,'register']);
         //Route::get("company/getProfile",[CompanyController::class,'getProfile']);
-        Route::get("company/changeStatus",[CompanyController::class,'changeStatus']);
+        Route::post("company/changeStatus",[CompanyController::class,'changeStatus']);
         Route::delete("employee/destroyUser",[EmployeeController::class,'destroyUser']);
         Route::post("employee/sentEmailToRegister",[EmployeeController::class,'sentEmailToRegister']);
         Route::put("company/editProfile",[CompanyController::class,'editProfile']);
@@ -85,8 +85,8 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         Route::post("committee/addMember",[CommitteeMemberController::class,'create']);
         Route::post("virtual_committee/addMember",[VirtualCommitteeMemberController::class,'create']);
         
-        Route::get("committee/getCommitteesOfTender",[CommitteeController::class,'getCommitteesOfTender']);
-        Route::get("virtual_committee/getVirtualCommittees",[VirtualCommitteeController::class,'getVirtualCommittees']);
+        Route::post("committee/getCommitteesOfTender",[CommitteeController::class,'getCommitteesOfTender']);
+        Route::post("virtual_committee/getVirtualCommittees",[VirtualCommitteeController::class,'getVirtualCommittees']);
 
     });
     ///***///

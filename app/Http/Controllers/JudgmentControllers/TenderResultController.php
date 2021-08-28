@@ -34,7 +34,9 @@ class TenderResultController extends Controller
     {
         $judgment = null;
         $judgment = TenderResult::where('tender_id',$request->tender_id)->get('submit_form_id')->first()->submit_form_id;
+        if($judgment)
         return response()->json(GeneralTrait::returnData('TenderResult',$judgment));
+        else return response()->json(GeneralTrait::returnError('404','TenderResult has not been announced yet'));
     }
     public function addTenderResult(Request $request)
     {
@@ -68,12 +70,12 @@ class TenderResultController extends Controller
         $with_result = Tender::join('tender_result','tender_result.tender_id','=','tenders.tender_id')
         ->join('submit_forms','submit_forms.submit_form_id','=','tender_result.submit_form_id')
         ->where('submit_forms.company_id',$company_id)
-        ->orderBy('submit_forms.created_at','asc');
+        ->orderBy('submit_forms.created_at','asc')->get();
         $without_result = Tender::rightJoin('tender_result','tender_result.tender_id','!=','tenders.tender_id')
         ->join('tender_track','tender_track.tender_id','=','tenders.tender_id')
         ->where('tender_track.decision_committee_judgment_date_end','>',(new Carbon(now('UTC'))))
         ->where('submit_forms.company_id',$company_id)
-        ->orderBy('submit_forms.created_at','asc');
+        ->orderBy('submit_forms.created_at','asc')->get();
         
         return response()->json(GeneralTrait::returnData('offers',compact('with_result','without_result')));
     }

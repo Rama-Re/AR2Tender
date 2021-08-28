@@ -93,8 +93,10 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         
         Route::post("company/notifyInvitedUsers",[TenderController::class,'notifyInvitedUsers']);
         //الشركة أو عضو اللجنة
-        Route::post("Tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
-        Route::post("Committee/getResultOfMyOffers",[TenderResultController::class,'getResultOfMyOffers']);
+        Route::post("tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
+        Route::post("company/getResultOfMyOffers",[TenderResultController::class,'getResultOfMyOffers']);
+        
+        Route::post("tender/getTenderResult",[TenderResultController::class,'getTenderResult']);
     });
     ///***///
     //Employee Group
@@ -104,14 +106,14 @@ Route::group(['middleware' => ['checkToken','active_user','verifyUser']], functi
         Route::post("employee/getCommitteesOfEmployee",[CommitteeController::class,'getCommitteesOfEmployee']);
         //مدير لجنة بالمناقصة وايدي المناقصة مطلوب
         Route::group(['middleware' => []], function () {
-            Route::post("Committee/addJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'addJudgmentOfCommittee']);
-            Route::post("Tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
+            Route::post("committee/addJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'addJudgmentOfCommittee']);
+            Route::post("tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
         });
         //مدير لجنة الإقرار وايدي المناقصة مطلوب
         Route::group(['middleware' => []], function () {
-            Route::post("Committee/addTenderResult",[TenderResultController::class,'addTenderResult']);
-            Route::post("Tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
-            Route::post("Tender/notifysubmittedUsers",[TenderResultController::class,'notifysubmittedUsers']);
+            Route::post("committee/addTenderResult",[TenderResultController::class,'addTenderResult']);
+            Route::post("tender/getJudgmentOfCommittee",[JudgmentOfCommitteeController::class,'getJudgmentOfCommittee']);
+            Route::post("tender/notifysubmittedUsers",[TenderResultController::class,'notifysubmittedUsers']);
         });
     });
 });

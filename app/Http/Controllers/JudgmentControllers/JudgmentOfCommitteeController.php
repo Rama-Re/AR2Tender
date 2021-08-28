@@ -21,25 +21,25 @@ class JudgmentOfCommitteeController extends Controller
             'submit_form_id' => 'required',
             'committee_member_id' => 'required',
             'judgment' => 'required',
-            'vote' => 'required|min:0|max:100'
+            'vote' => 'required|min:0|max:10'
         ];
         return MyValidator::validation($data,$rules);
     }
     public function getJudgmentOfCommittee(Request $request)
     {
         $judgment = null;
-        if($request->has('committee_judgment_id')) {
+        if($request->committee_judgment_id) {
             $judgment = JudgmentOfCommittee::find($request->committee_judgment_id)->get()->first();
         }
-        else if($request->has('submit_form_id') && $request->has('committee_member_id')){
-            $judgment = JudgmentOfCommittee::where('committee_judgment_id',$request->committee_judgment_id)
+        else if($request->submit_form_id && $request->committee_member_id){
+            $judgment = JudgmentOfCommittee::where('committee_member_id',$request->committee_member_id)
             ->where('submit_form_id',$request->submit_form_id)->get()->first();
         }
-        else if($request->has('submit_form_id')) {
+        else if($request->submit_form_id) {
             $judgment = JudgmentOfCommittee::where('submit_form_id',$request->submit_form_id)->get();
         }
-        else if($request->has('committee_member_id')){
-            $judgment = JudgmentOfCommittee::where('committee_judgment_id',$request->committee_judgment_id)->get();
+        else if($request->committee_member_id){
+            $judgment = JudgmentOfCommittee::where('committee_member_id',$request->committee_member_id)->get();
         }
         else {
             return response()->json(GeneralTrait::returnError('400','committee_judgment_id is required'));

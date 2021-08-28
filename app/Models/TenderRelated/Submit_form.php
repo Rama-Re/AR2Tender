@@ -17,7 +17,6 @@ class Submit_form extends Model
     ];
     protected $table = 'submit_forms';
     protected $primaryKey = 'submit_form_id'; //the name is just neglecated
-    public $incrementing = false;
 
     protected $attributes = [
         'price' => '0',

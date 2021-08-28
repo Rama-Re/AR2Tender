@@ -94,8 +94,8 @@ class EmployeeController extends Controller
                 $employee = Employee::join('users','users.user_id','=','employees.user_id')->where('employee_id',$request->employee_id)->get(['email','password'])->first();
                 if(!$employee) return response()->json(GeneralTrait::returnError('404', 'this employee is not found'));
                 $details = [
-                    'title'=> $company_name.'\nYou have to sign in at AR2Tender Application with this account',
-                    'body'=> 'email: '.$employee->email.'\npassword: '.$request->password
+                    'title'=> $company_name->company_name." is inviting you to sign in at AR2Tender Application with this account",
+                    'body'=> 'email: '.$employee->email.', password: '.$request->password
                 ];
                 Mail::to($employee->email)->send(new \App\Mail\SampleMail($details));
                 return response()->json(GeneralTrait::returnSuccessMessage('email send successfully'));

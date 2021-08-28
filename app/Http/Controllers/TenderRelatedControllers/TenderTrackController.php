@@ -79,6 +79,7 @@ class TenderTrackController extends Controller
     }
     public static function checkAfterStart($date,$tender_id)
     {
+        
         $startDateOFTender =Tender_track::where('tender_id', $tender_id)->value('start_date');
         if( $date > $startDateOFTender ){
             return true;

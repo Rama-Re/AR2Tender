@@ -46,6 +46,7 @@ class SubmitFormController extends Controller
             return $generalTrait->returnError('400', "the tender is a draft you can't submit to it");
         }
 
+        
         $started = TenderTrackController::checkAfterStart(new Carbon(now('UTC')), $request->tender_id);
         if (!$started) {
             return $generalTrait->returnError('400', "you cant submit the tender didn't start yet");
@@ -57,6 +58,10 @@ class SubmitFormController extends Controller
         $canSubmit = SelectiveTenderController::checkAbility($result, $request->tender_id);
         if (!$canSubmit) {
             return $generalTrait->returnError('400', "this tender is a selective tender and has conditions you don't meet");
+        }
+        $sub = Submit_form::where('tender_id',$request->tender_id)->where('company_id',$result)->get()->first();
+        if($sub){
+            return $generalTrait->returnError('400', "you can't submit again");
         }
         $submission = new Submit_form;
         try {

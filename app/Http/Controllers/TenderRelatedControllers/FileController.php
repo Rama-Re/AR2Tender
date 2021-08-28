@@ -22,7 +22,7 @@ class FileController extends Controller
 {
     public static function replace_extension($filename, $new_extension) {
         $info = pathinfo($filename);
-        return $info . '.' . $new_extension;
+        return $info['dirname'].$info['filename'] . '.' . $new_extension;
     }
     public static function toUploadedFile($fileFromDB)
     {
@@ -33,12 +33,14 @@ class FileController extends Controller
         $originalName = $name . '.' . $extension;
         $mimeType = $fileFromDB->mime_type;
         $error = null;
-
+        
         $contents = Storage::get($path);
         $FileContent = Crypt::decryptString($contents);
         Storage::disk('local')->put($path, $FileContent);
 
-        dd(self::replace_extension($path,$fileFromDB->extension));
+        $new_path = self::replace_extension( $path,$fileFromDB->extension);
+
+        dd(rename ($path,$new_path));
 
         return new UploadedFile($path, $originalName, $mimeType, $error, false);
 
@@ -91,7 +93,7 @@ class FileController extends Controller
             }
             return GeneralTrait::returnError('404',"something went wrong");
         }catch(Exception $e){
-            return GeneralTrait::returnError('404',$e->getMessage());
+            return GeneralTrait::returnError('404',"som thing happened ".$e->getMessage());
             //return GeneralTrait::returnError('404',"couldn't open the file");
 
         }
@@ -177,6 +179,7 @@ class FileController extends Controller
     {
 
         $filePath = self::toUploadedFile($fileFromDB);
+        
         try {
             $handle = fopen($filePath, 'r');
             $oFileContent = fread($handle, $filePath->getSize());

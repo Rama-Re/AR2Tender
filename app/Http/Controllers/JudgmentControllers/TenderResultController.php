@@ -81,11 +81,17 @@ class TenderResultController extends Controller
     public function notifysubmittedUsers(Request $request)
     {
         $user_id = UserAuthController::getUser($request)['user']->user_id;
-        $result = MyValidator::validation($request->only('tender_result_id'),['tender_result_id'=>'required']);
+        $result = MyValidator::validation($request->only('tender_result_id'),['tender_result_id'=>'required|exists:tender_result,tender_result_id']);
         if($result['status']){
-            $tender_name = Tender::where('tender_id',$request->tender_id)->get('tender_name')->first()->tender_name;
-            $receivers = 
-            
+            $tender_name = Tender::leftJoin('tenders','tenders.tender_id','=','tender_result.tender_id')
+            ->where('tender_result.tender_result_id',$request->tender_result_id)
+            ->get('tender_name')->first()->tender_name;
+            $receivers = TenderResult::rightJoin('tender_result','tender_result.submit_form_id','!=','submit_forms.submit_form_id')
+            ->join('submit_forms','submit_forms.company_id','=','companies.company_id')
+            ->join('companies','companies.user_id','=','users.user_id')
+            ->join('users','users.user_id','=','fcm_tokens.user_id')
+            ->where('tender_result.tender_result_id',$request->tender_result_id)
+            ->get('fcm_token');
 
             if(!$receivers) return response()->json(GeneralTrait::returnError('403','failed request'));
             $data = NotificationController::getNoti($tender_name,'You lost',$user_id);
@@ -93,8 +99,12 @@ class TenderResultController extends Controller
                 return response()->json(GeneralTrait::returnError('404','couldn\'t generate notifications'));
             }
             $notify1 = compact('receivers','data');
-            $receivers = TenderResult::join('tenders','tenders.tender_id','=','')
-            
+            $receivers = TenderResult::join('tender_result','tender_result.submit_form_id','=','submit_forms.submit_form_id')
+            ->join('submit_forms','submit_forms.company_id','companies.company_id')
+            ->join('companies','companies.user_id','=','users.user_id')
+            ->join('users','users.user_id','=','fcm_tokens.user_id')
+            ->where('tender_result.tender_result_id',$request->tender_result_id)
+            ->get('fcm_token');
             
             if(!$receivers) return response()->json(GeneralTrait::returnError('403','failed request'));
             $data = NotificationController::getNoti($tender_name,'You won',$user_id);

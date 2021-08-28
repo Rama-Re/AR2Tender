@@ -15,6 +15,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\File as FacadesFile;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
@@ -88,9 +89,10 @@ class FileController extends Controller
                     return GeneralTrait::returnError('403', 'could not get the file');
                 }
             }
-            return GeneralTrait::returnError('404', "something went wrong");
-        } catch (Exception $e) {
-            return GeneralTrait::returnError('404', "couldn't open the file");
+            return GeneralTrait::returnError('404',"something went wrong");
+        }catch(Exception $e){
+            return GeneralTrait::returnError('404',$e->getMessage());
+            //return GeneralTrait::returnError('404',"couldn't open the file");
 
         }
     }

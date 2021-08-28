@@ -1,8 +1,11 @@
 <?php
 namespace App\Http\Controllers\TenderRelatedControllers;
 
+use App\Http\Controllers\AccountControllers\CompanyController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
+use App\Http\Controllers\MyValidator;
+use App\Models\Account\Company;
 use App\Models\TenderRelated\Submit_form;
 use App\Models\TenderRelated\Tender;
 use Carbon\Carbon;
@@ -22,10 +25,15 @@ class SubmitFormController extends Controller
     }
     public function store(Request $request)
     {
-
         // need to check if they can submit
         $generalTrait = new GeneralTrait;
-        $result = $this->checkAndGetCompanyID($request);
+        $result = CompanyController::checkAndGetCompanyID($request);
+        $res = MyValidator::validation($request->only('tender_id'),[
+            'tender_id' => 'required|exists:tenders,tender_id'
+        ]);
+        if(!$res['status']){
+            return $res;
+        }
 
         if (!is_numeric($result)) {
             // if the id is not numeric then it is a json response and not companyId

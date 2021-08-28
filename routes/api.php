@@ -15,10 +15,12 @@ use App\Http\Controllers\LocWithConnectControllers\CityController;
 use App\Http\Controllers\LocWithConnectControllers\CountryController;
 use App\Http\Controllers\LocWithConnectControllers\LocationController;
 use App\Http\Controllers\TenderRelatedControllers\FileController;
+use App\Http\Controllers\TenderRelatedControllers\SubmitFormController;
 use App\Http\Controllers\TenderRelatedControllers\SupplierFileController;
 use App\Http\Controllers\TenderRelatedControllers\TenderController;
 use App\Http\Controllers\TenderRelatedControllers\TenderFileController;
 use App\Models\Account\Employee;
+use App\Models\TenderRelated\Submit_form;
 
 /*
 |--------------------------------------------------------------------------
@@ -136,4 +138,4 @@ Route::get("emailsFromTender",[TenderController::class,'emailsFromTender']);
 Route::get("getLocations",[LocationController::class,'index']);
 Route::get("getCountries",[CountryController::class,'index']);
 Route::get("getCompanies",[CompanyController::class,'getAll']);
-
+Route::post("storeSubmission",[SubmitFormController::class,'store']);

@@ -19,8 +19,8 @@ class CreateCompaniesTable extends Migration
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->string('director_name'); 
             $table->string('company_name');
-            $table->string('image')->unique()->nullable();
-            $table->string('image_path')->unique()->nullable();
+            $table->string('image')->nullable();
+            $table->string('image_path')->nullable();
             $table->string('username')->unique();
             $table->longText('about_us');
             $table->enum('status', ['TenderOffer', 'TendersManager'])->default('TendersManager');

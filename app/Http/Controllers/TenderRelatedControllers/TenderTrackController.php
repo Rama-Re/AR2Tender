@@ -31,7 +31,7 @@ class TenderTrackController extends Controller
             $date = new Carbon(now('UTC'));
             $tender_track = new Tender_track();
             $tender_track->tender_id = $tenderID;
-            $tender_track->start_date = ($request->has('start_date'))?new Carbon($request->start_date,'UTC'):$date;
+            $tender_track->start_date = ($request->has('start_date')&& $request->start_date >= $date)?new Carbon($request->start_date,'UTC'):$date;
 
             if($request->end_date){
                 $endDate = new Carbon($request->end_date,'UTC');

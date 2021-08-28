@@ -11,35 +11,44 @@ use App\Models\TenderRelated\Supplier_file;
 use App\Models\TenderRelated\Tender_file;
 use Exception;
 use Illuminate\Contracts\Cache\Store;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\AcceptHeader;
-
-use function GuzzleHttp\Promise\exception_for;
 
 class FileController extends Controller
 {
-    public static function pathToUploadedFile( $path )
+    public static function replace_extension($filename, $new_extension) {
+        $info = pathinfo($filename);
+        return $info . '.' . $new_extension;
+    }
+    public static function toUploadedFile($fileFromDB)
     {
-      $name = File::name( $path );
-      $extension = File::extension( $path );
-      $originalName = $name . '.' . $extension;
-      $mimeType = File::mimeType( $path );
-      $size = File::size( $path );
-      $error = false;
-      $test = false;
-      $object = new UploadedFile( $path, $originalName, $mimeType, $size, $error, $test );
-      return $object;
+        $filesystem = new Filesystem;
+        $path = Crypt::decryptString($fileFromDB->path);
+        $name = $filesystem->name($path);
+        $extension = $filesystem->extension($path);
+        $originalName = $name . '.' . $extension;
+        $mimeType = $fileFromDB->mime_type;
+        $error = null;
+
+        $contents = Storage::get($path);
+        $FileContent = Crypt::decryptString($contents);
+        Storage::disk('local')->put($path, $FileContent);
+
+        dd(self::replace_extension($path,$fileFromDB->extension));
+
+        return new UploadedFile($path, $originalName, $mimeType, $error, false);
+
     }
 
     public static function decryptCollection($files)
     {
         $decrypted = $files->map(function ($item, $key) {
             return [
-                'file_id' =>$item->file_id,
-                'name' => substr(Crypt::decryptString($item->name), strpos(Crypt::decryptString($item->name),'%')+1),
+                'file_id' => $item->file_id,
+                'name' => substr(Crypt::decryptString($item->name), strpos(Crypt::decryptString($item->name), '%') + 1),
                 'size' => $item->size,
                 'path' => public_path(Crypt::decryptString($item->path)),
                 'type' => $item->type,
@@ -53,34 +62,35 @@ class FileController extends Controller
         #### not over need to bring the file_id from the database +   ####
         //give the name of the file and get the file
         //belongsto = 'tender', 'supplier'
-        $res = MyValidator::validation($request->only('file_id','needPath'),[
+        $res = MyValidator::validation($request->only('file_id', 'needPath'), [
             'file_id' => 'required|exists:files,file_id',
-            'needPath' => 'boolean|required'
+            'needPath' => 'boolean|required',
         ]);
         if (!$res['status']) {
             return $res;
         }
-        $fileFromDB= File::where('file_id',$request->file_id)->get()->first();
+        $fileFromDB = File::where('file_id', $request->file_id)->get()->first();
 
         $path = Crypt::decryptString($fileFromDB->path);
         $needPath = $request->needPath;
-        if($needPath){
-            return GeneralTrait::returnData('path',$path);
-        } 
-        try{
-            $decRes = $this->decryptFile($path);
-            if($decRes==true){
-                $file= response()->download(public_path($path));
+
+        if ($needPath) {
+            return GeneralTrait::returnData('path', $path);
+        }
+        try {
+            $decRes = $this->decryptFile($fileFromDB);
+            if ($decRes == true) {
+                $file = response()->download(public_path($path));
                 $hashRes = $this->hashFile(public_path($path));
-                if($hashRes==true){
+                if ($hashRes == true) {
                     return $file;
-                }else{
-                    return GeneralTrait::returnError('403','could not get the file');
+                } else {
+                    return GeneralTrait::returnError('403', 'could not get the file');
                 }
             }
-            return GeneralTrait::returnError('404',"something went wrong");
-        }catch(Exception $e){
-            return GeneralTrait::returnError('404',"couldn't open the file");
+            return GeneralTrait::returnError('404', "something went wrong");
+        } catch (Exception $e) {
+            return GeneralTrait::returnError('404', "couldn't open the file");
 
         }
     }
@@ -119,7 +129,7 @@ class FileController extends Controller
                     $fileToDB->submit_form_id = $request->submit_form_id;
                 }
                 try {
-                    
+
                     if (is_numeric($fileId)) {
                         $fileToDB->file_id = $fileId;
                         $result = $fileToDB->save();
@@ -147,10 +157,9 @@ class FileController extends Controller
 
     public static function hashFile($filePath)
     {
-        // if extension is pdf convert it to txt
         try {
             $handle = fopen($filePath, 'r');
-            $oFileContent = fread($handle,$filePath->getSize());
+            $oFileContent = fread($handle, $filePath->getSize());
             fclose($handle);
             $encryptedFileContent = Crypt::encryptString($oFileContent);
             $handle1 = fopen($filePath, 'w');
@@ -161,15 +170,14 @@ class FileController extends Controller
             return false;
         }
 
-        // change from text to pdf if pdf
     }
-    public static function decryptFile ($filePath)
+    public static function decryptFile($fileFromDB)
     {
-        // if extension is pdf convert it to txt
-        $filePath = self::pathToUploadedFile($filePath);
+
+        $filePath = self::toUploadedFile($fileFromDB);
         try {
             $handle = fopen($filePath, 'r');
-            $oFileContent = fread($handle,$filePath->getSize());
+            $oFileContent = fread($handle, $filePath->getSize());
             fclose($handle);
             $encryptedFileContent = Crypt::encryptString($oFileContent);
             $handle1 = fopen($filePath, 'w');
@@ -180,8 +188,6 @@ class FileController extends Controller
             return false;
         }
 
-
-        // change from text to pdf if pdf
     }
 
     public static function store(Request $request, $belongsto)
@@ -190,25 +196,27 @@ class FileController extends Controller
         $files = array();
 
         foreach ($request->file as $file) {
+            
             $res = self::hashFile($file);
-         try {
-             if($res == true){
-                 $fileToDB = new File;
-                 $name = $file->getClientOriginalName();
-                 $fileToDB->name = Crypt::encryptString(time() . '%' . $name); // I put the % to make it easy to get the name without the time
-                 $fileToDB->type = $request->fileType; // 'financial requirement','technician requirement','other'
-                 $fileToDB->belongsto = $belongsto; //'tender', 'supplier'
-                 $fileToDB->path = Crypt::encryptString($path = $file->store('public/files/' . $belongsto)); // maybe I should hash here
-                 $fileToDB->size = NumberHelper::readableSize(Storage::size($path)); //not woked
-                 $fileToDB->save();
-                array_push($files, $fileToDB->file_id);
-             }else {
+            try {
+                if ($res == true) {
+                    $fileToDB = new File;
+                    $fileToDB->mime_type = $file->getClientMimeType();
+                    $fileToDB->extension = $file->getClientOriginalExtension();
+                    $name = $file->getClientOriginalName();
+                    $fileToDB->name = Crypt::encryptString(time() . '%' . $name); // I put the % to make it easy to get the name without the time
+                    $fileToDB->type = $request->fileType; // 'financial requirement','technician requirement','other'
+                    $fileToDB->belongsto = $belongsto; //'tender', 'supplier'
+                    $fileToDB->path = Crypt::encryptString($path = $file->store('public/files/' . $belongsto)); // maybe I should hash here
+                    $fileToDB->size = NumberHelper::readableSize(Storage::size($path)); //not woked
+                    $fileToDB->save();
+                    array_push($files, $fileToDB->file_id);
+                } else {
+                    array_push($files, false);
+                }
+            } catch (Exception $e) {
                 array_push($files, false);
-             }
-         }
-         catch(Exception $e){
-            array_push($files, false);
-         }
+            }
         }
         return $files;
 

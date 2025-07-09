@@ -1,62 +1,124 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# 🏗️ AR2Tender — Tender Management Backend (Laravel)
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**AR2Tender** is the backend system for a digital tendering platform, developed using **Laravel**. It handles all server-side logic required to manage tenders, user roles, bid submissions, evaluations, and result publication.
 
-## About Laravel
+> 📌 **This repository includes only the backend (Laravel)**. The frontend (Flutter) is maintained separately and is not part of this repo.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📌 Project Objective
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+AR2Tender aims to modernize and digitize the entire tendering workflow — from creating and publishing tenders to securely submitting offers, forming evaluation committees, and announcing results.  
+The system is role-based, secure, and highly configurable.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 👥 User Roles & Responsibilities
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The backend system defines flexible role-based access. Some user types can **act in more than one role** depending on the context:
 
-## Laravel Sponsors
+| Role             | Description |
+|------------------|-------------|
+| **Admin**         | Manages the system, verifies users, and oversees all operations |
+| **Company**       | Can either **publish tenders** or **submit offers** to existing ones |
+| **Bidder**        | Technically a "Company" acting as a bidder (via role switch) |
+| **Employee**      | Company staff who may also be assigned as **committee members** |
+| **Viewer**        | Can browse public tenders without registration |
+| **Committee Member** | Selected employees who evaluate offers and issue judgments |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+---
 
-### Premium Partners
+## 🔐 Key Backend Features
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+- JWT-based Authentication & Authorization
+- Role switching logic (Company as publisher or bidder)
+- Tender publishing (with filters: specialty, location, visibility)
+- Secure offer submission with encrypted files
+- Committee-based evaluation with final judgment
+- Email verification and password recovery (via SMTP)
+- REST API endpoints with JSON responses
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🛠️ Tech Stack
 
-## Code of Conduct
+- **Laravel 8+** (PHP)
+- **MySQL / MariaDB**
+- **Eloquent ORM**
+- **JWT Authentication**
+- **SMTP** (email services)
+- **Carbon** (date/time handling)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 📦 Setup Instructions
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# Clone the backend repo
+git clone https://github.com/Rama-Re/AR2Tender.git
+cd AR2Tender
 
-## License
+# Install dependencies
+composer install
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Setup environment file
+cp .env.example .env
+php artisan key:generate
+
+# Set DB credentials in .env
+php artisan migrate
+
+# Start development server
+php artisan serve
+```
+
+---
+
+## 🗃️ Main Entities (Database Models)
+
+| Table / Model Name       | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `users`                  | Base user accounts (admin, company, employee, etc.)                         |
+| `companies`              | Company profiles (linked 1:1 with users)                                    |
+| `company_locations`      | Branches and addresses of each company                                      |
+| `phones`                 | Phone numbers related to company locations                                  |
+| `locations`              | Cities linked to each branch                                                |
+| `countries`              | Country master data                                                         |
+| `tenders`                | Tenders created by companies                                                |
+| `tender_files`           | Files attached to each tender (e.g., documents, specs)                      |
+| `submit_forms`           | Offers submitted by companies (linked to specific tenders)                 |
+| `supplier_files`         | Files attached to each submitted offer                                      |
+| `selective_countries`    | Countries targeted by selective tenders                                     |
+| `selective_companies`    | Specific companies allowed to access a tender                               |
+| `selective_specialty`    | Field of specialty targeting in tenders                                     |
+| `employees`              | Company staff who can be assigned roles (like committee members)            |
+| `committees`             | Evaluation committees created per tender                                    |
+| `committee_members`      | Employees added as members of specific committees                           |
+| `judgment_of_committees` | Individual scores and judgments by committee members                        |
+| `tender_results`         | Final decision for a specific tender submission                             |
+| `fcm_tokens`             | Device tokens for push notifications via Firebase                          |
+
+
+---
+
+
+## 🧩 Entity Relationship Diagram (ERD)
+
+Here's a high-level view of the database structure for the AR2Tender backend:
+
+![Tendering System ERD - Project 1](https://github.com/user-attachments/assets/6d984452-50da-45a1-abc9-950804c75354)
+
+
+---
+
+
+## 📄 License
+
+This backend project is for academic and demonstration purposes only. Not licensed for commercial use.
+
+---
+
+## 📄 Project Report
+
+You can download the full system analysis and design report here:  
+📥 [View Report (PDF)](docs/AR2Tender_Report.pdf)

@@ -120,5 +120,5 @@ This backend project is for academic and demonstration purposes only. Not licens
 
 ## 📄 Project Report
 
-You can download the full system analysis and design report here:  
-📥 [View Report (PDF)](docs/AR2Tender_Report.pdf)
+You can download and read the full system analysis and documentation here:  
+📥 [📄 View Full Project Report (PDF)](docs/G71-%20Tendering%20System.pdf)
